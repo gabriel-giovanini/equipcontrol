@@ -11,7 +11,7 @@ TechControl — Projeto PAM I
 ## Integrantes
 
 - Gabriel Giovanini
-- Allan Alves Talhari Exu
+- Allan Alves Talhari
 
 ## Tema
 
