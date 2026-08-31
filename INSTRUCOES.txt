@@ -1,0 +1,21 @@
+=== COMO TESTAR O PROJETO EQUIPCONTROL ===
+
+Olá, Professor! 
+Para que o projeto fique mais leve para envio, a pasta "node_modules" foi removida. 
+Para rodar o aplicativo e avaliar nosso trabalho, por favor siga os passos abaixo:
+
+1. Abra o terminal (ou Prompt de Comando/PowerShell) dentro desta pasta do projeto (Equip-control).
+
+2. Instale as dependências executando o comando:
+   npm install
+
+3. Após a conclusão da instalação, inicie o servidor do Expo rodando:
+   npm start
+
+4. O terminal exibirá um QR Code. Você pode escaneá-lo com o aplicativo "Expo Go" no seu celular, ou pressionar a tecla "w" no terminal para visualizar no navegador (caso prefira testar a versão web).
+
+Telas desenvolvidas nesta Fase 1:
+- Tela de Lista de Equipamentos (com dados estáticos e botão flutuante).
+- Tela de Detalhes do Equipamento (navegação funcionando ao clicar em um item).
+
+Agradecemos a avaliação!
