@@ -11,6 +11,52 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+// ─── Design Tokens (UI/UX Pro Max: SaaS Enterprise) ────────────────
+const COLORS = {
+  // Surfaces
+  bgDeep:       '#0A1628',
+  bgBody:       '#F0F4FA',
+  bgCard:       '#FFFFFF',
+
+  // Primary palette
+  primary:      '#3B82F6',
+  primaryBg:    'rgba(59, 130, 246, 0.1)',
+
+  // Semantic
+  success:      '#10B981',
+  successBg:    'rgba(16, 185, 129, 0.12)',
+  warning:      '#F59E0B',
+  warningBg:    'rgba(245, 158, 11, 0.12)',
+
+  // Text
+  textWhite:    '#FFFFFF',
+  textPrimary:  '#0F172A',
+  textSecondary:'#64748B',
+  textMuted:    '#94A3B8',
+
+  border:       '#E2E8F0',
+  glassBg:      'rgba(255, 255, 255, 0.1)',
+};
+
+const SPACING = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  xxxl: 32,
+};
+
+const RADIUS = {
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  pill: 100,
+};
+
 export default function EquipmentDetailScreen({ route, navigation }) {
   const insets = useSafeAreaInsets();
   const { equipment } = route.params;
@@ -21,37 +67,41 @@ export default function EquipmentDetailScreen({ route, navigation }) {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar style="light" />
 
-      {/* Header */}
+      {/* ── Header ── */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Voltar"
         >
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+          <Ionicons name="arrow-back" size={22} color={COLORS.textWhite} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Detalhes</Text>
+        <Text style={styles.headerTitle}>Detalhes do Equipamento</Text>
         <View style={styles.headerSpacer} />
       </View>
 
+      {/* ── Body ── */}
       <ScrollView
         style={styles.body}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Card principal */}
+        {/* Main Card */}
         <View style={styles.mainCard}>
-          {/* Ícone + Nome */}
-          <View style={styles.topSection}>
-            <View style={[styles.iconCircle, isAvailable ? styles.iconAvailable : styles.iconBorrowed]}>
+          {/* Header Section */}
+          <View style={styles.cardHeader}>
+            <View style={[styles.iconHero, isAvailable ? styles.iconAvailable : styles.iconBorrowed]}>
               <Ionicons
                 name={getCategoryIcon(equipment.categoria)}
-                size={32}
-                color="#FFFFFF"
+                size={40}
+                color={isAvailable ? COLORS.success : COLORS.warning}
               />
             </View>
             <Text style={styles.equipmentName}>{equipment.nome}</Text>
-            <View style={[styles.statusBadge, isAvailable ? styles.badgeAvailable : styles.badgeBorrowed]}>
+            
+            <View style={[styles.statusPill, isAvailable ? styles.pillAvailable : styles.pillBorrowed]}>
               <View style={[styles.statusDot, isAvailable ? styles.dotAvailable : styles.dotBorrowed]} />
               <Text style={[styles.statusText, isAvailable ? styles.textAvailable : styles.textBorrowed]}>
                 {equipment.status}
@@ -61,50 +111,55 @@ export default function EquipmentDetailScreen({ route, navigation }) {
 
           <View style={styles.divider} />
 
-          {/* Informações detalhadas */}
-          <View style={styles.detailsSection}>
-            <DetailRow
-              icon="person-outline"
-              label="Responsável"
+          {/* Details Section */}
+          <View style={styles.detailsList}>
+            <DetailItem
+              icon="person"
+              label="Responsável Atual"
               value={equipment.responsavel}
             />
-            <DetailRow
-              icon="pricetag-outline"
+            <DetailItem
+              icon="grid"
               label="Categoria"
               value={equipment.categoria}
             />
-            <DetailRow
-              icon="calendar-outline"
-              label="Data de empréstimo"
+            <DetailItem
+              icon="calendar"
+              label="Data de Retirada"
               value={equipment.dataEmprestimo || '—'}
             />
-            <DetailRow
-              icon="time-outline"
-              label="Data prevista de devolução"
+            <DetailItem
+              icon="time"
+              label="Devolução Prevista"
               value={equipment.dataDevolucao || '—'}
               isLast
             />
           </View>
         </View>
 
-        {/* Card de ação rápida */}
-        <View style={styles.actionCard}>
-          <Ionicons name="information-circle-outline" size={20} color="#1A6BF5" />
-          <Text style={styles.actionText}>
-            Funções de edição e devolução estarão disponíveis na próxima versão.
-          </Text>
+        {/* Action Info Card */}
+        <View style={styles.infoCard}>
+          <View style={styles.infoIconWrap}>
+            <Ionicons name="bulb-outline" size={20} color={COLORS.primary} />
+          </View>
+          <View style={styles.infoContent}>
+            <Text style={styles.infoTitle}>Dica</Text>
+            <Text style={styles.infoText}>
+              Funções de edição, histórico e devolução estarão disponíveis na próxima versão do sistema.
+            </Text>
+          </View>
         </View>
       </ScrollView>
     </View>
   );
 }
 
-// Sub-componente para cada linha de detalhe
-function DetailRow({ icon, label, value, isLast }) {
+// ─── Sub-components ────────────────────────────────────────────────
+function DetailItem({ icon, label, value, isLast }) {
   return (
-    <View style={[styles.detailRow, isLast && styles.detailRowLast]}>
+    <View style={[styles.detailItem, !isLast && styles.detailItemBorder]}>
       <View style={styles.detailIconWrap}>
-        <Ionicons name={icon} size={18} color="#1A6BF5" />
+        <Ionicons name={icon} size={18} color={COLORS.primary} />
       </View>
       <View style={styles.detailTextWrap}>
         <Text style={styles.detailLabel}>{label}</Text>
@@ -114,7 +169,6 @@ function DetailRow({ icon, label, value, isLast }) {
   );
 }
 
-// Mapeia categorias para ícones
 function getCategoryIcon(category) {
   const icons = {
     Notebook: 'laptop-outline',
@@ -126,102 +180,110 @@ function getCategoryIcon(category) {
   return icons[category] || 'hardware-chip-outline';
 }
 
+// ─── Styles ────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0D2137',
+    backgroundColor: COLORS.bgDeep,
   },
+  
+  // ── Header ──
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.lg,
   },
   backButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.glassBg,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   headerTitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: COLORS.textWhite,
     letterSpacing: 0.2,
   },
   headerSpacer: {
-    width: 42,
+    width: 44,
   },
+
+  // ── Body ──
   body: {
     flex: 1,
-    backgroundColor: '#F2F4F8',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    backgroundColor: COLORS.bgBody,
+    borderTopLeftRadius: RADIUS.xxl,
+    borderTopRightRadius: RADIUS.xxl,
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
+    padding: SPACING.xl,
+    paddingBottom: SPACING.xxxl,
   },
+
+  // ── Main Card ──
   mainCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    overflow: 'hidden',
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.xl,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     ...Platform.select({
       ios: {
-        shadowColor: '#1B2A4A',
+        shadowColor: COLORS.textPrimary,
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 16,
+        shadowOpacity: 0.05,
+        shadowRadius: 12,
       },
       android: {
-        elevation: 4,
+        elevation: 3,
       },
     }),
   },
-  topSection: {
+  cardHeader: {
     alignItems: 'center',
-    paddingTop: 32,
-    paddingBottom: 24,
-    paddingHorizontal: 24,
+    padding: SPACING.xxxl,
   },
-  iconCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 22,
+  iconHero: {
+    width: 80,
+    height: 80,
+    borderRadius: RADIUS.xl,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    marginBottom: SPACING.lg,
   },
   iconAvailable: {
-    backgroundColor: '#0EA86A',
+    backgroundColor: COLORS.successBg,
   },
   iconBorrowed: {
-    backgroundColor: '#1A3A6B',
+    backgroundColor: COLORS.warningBg,
   },
   equipmentName: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#1B2A4A',
+    color: COLORS.textPrimary,
     textAlign: 'center',
-    letterSpacing: -0.3,
-    marginBottom: 12,
+    letterSpacing: -0.5,
+    marginBottom: SPACING.md,
   },
-  statusBadge: {
+  statusPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: RADIUS.pill,
     gap: 6,
   },
-  badgeAvailable: {
-    backgroundColor: '#E8F9F0',
+  pillAvailable: {
+    backgroundColor: COLORS.successBg,
   },
-  badgeBorrowed: {
-    backgroundColor: '#FFF3E6',
+  pillBorrowed: {
+    backgroundColor: COLORS.warningBg,
   },
   statusDot: {
     width: 8,
@@ -229,78 +291,95 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   dotAvailable: {
-    backgroundColor: '#0EA86A',
+    backgroundColor: COLORS.success,
   },
   dotBorrowed: {
-    backgroundColor: '#E8871E',
+    backgroundColor: COLORS.warning,
   },
   statusText: {
-    fontSize: 13,
-    fontWeight: '600',
-    letterSpacing: 0.2,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
   textAvailable: {
-    color: '#0EA86A',
+    color: COLORS.success,
   },
   textBorrowed: {
-    color: '#E8871E',
+    color: COLORS.warning,
   },
+
   divider: {
     height: 1,
-    backgroundColor: '#F0F2F5',
-    marginHorizontal: 24,
+    backgroundColor: COLORS.border,
   },
-  detailsSection: {
-    padding: 24,
+
+  // ── Details List ──
+  detailsList: {
+    padding: SPACING.xxl,
   },
-  detailRow: {
+  detailItem: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 22,
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
   },
-  detailRowLast: {
-    marginBottom: 0,
+  detailItemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
   detailIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 11,
-    backgroundColor: '#EFF4FF',
+    width: 40,
+    height: 40,
+    borderRadius: RADIUS.md,
+    backgroundColor: COLORS.primaryBg,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
+    marginRight: SPACING.lg,
   },
   detailTextWrap: {
     flex: 1,
-    justifyContent: 'center',
   },
   detailLabel: {
-    fontSize: 12,
-    color: '#7A8A9E',
-    fontWeight: '500',
-    letterSpacing: 0.3,
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    fontWeight: '600',
+    letterSpacing: 0.5,
     textTransform: 'uppercase',
-    marginBottom: 3,
+    marginBottom: 4,
   },
   detailValue: {
     fontSize: 16,
-    color: '#1B2A4A',
-    fontWeight: '600',
+    color: COLORS.textPrimary,
+    fontWeight: '700',
   },
-  actionCard: {
+
+  // ── Info Card ──
+  infoCard: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#EFF4FF',
-    borderRadius: 14,
-    padding: 16,
-    marginTop: 16,
-    gap: 12,
+    backgroundColor: COLORS.primaryBg,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.lg,
+    marginTop: SPACING.xl,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.2)',
   },
-  actionText: {
+  infoIconWrap: {
+    marginRight: SPACING.md,
+    marginTop: 2,
+  },
+  infoContent: {
     flex: 1,
+  },
+  infoTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.primary,
+    marginBottom: 4,
+  },
+  infoText: {
     fontSize: 13,
-    color: '#4A6FA5',
+    color: COLORS.textSecondary,
+    lineHeight: 20,
     fontWeight: '500',
-    lineHeight: 18,
   },
 });

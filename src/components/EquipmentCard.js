@@ -8,7 +8,45 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-// Mapeia categorias para ícones
+// ─── Design Tokens (UI/UX Pro Max: SaaS Enterprise) ────────────────
+const COLORS = {
+  bgCard:       '#FFFFFF',
+  
+  primary:      '#3B82F6',
+  primaryLight: '#60A5FA',
+  primaryBg:    'rgba(59, 130, 246, 0.1)',
+
+  success:      '#10B981',
+  successBg:    'rgba(16, 185, 129, 0.12)',
+  
+  warning:      '#F59E0B',
+  warningBg:    'rgba(245, 158, 11, 0.12)',
+
+  error:        '#EF4444',
+  errorBg:      'rgba(239, 68, 68, 0.12)',
+
+  textPrimary:  '#0F172A',
+  textSecondary:'#64748B',
+  textMuted:    '#94A3B8',
+
+  border:       '#E2E8F0',
+};
+
+const SPACING = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+};
+
+const RADIUS = {
+  sm: 8,
+  md: 12,
+  lg: 16,
+  pill: 100,
+};
+
 const CATEGORY_ICONS = {
   Notebook: 'laptop-outline',
   Projetor: 'videocam-outline',
@@ -18,42 +56,64 @@ const CATEGORY_ICONS = {
 };
 
 export default function EquipmentCard({ equipment, onPress }) {
-  const isAvailable = equipment.status === 'Disponível';
   const iconName = CATEGORY_ICONS[equipment.categoria] || 'hardware-chip-outline';
+
+  // Define colors based on status
+  let statusColor = COLORS.primary;
+  let statusBg = COLORS.primaryBg;
+
+  if (equipment.status === 'Disponível') {
+    statusColor = COLORS.success;
+    statusBg = COLORS.successBg;
+  } else if (equipment.status === 'Em uso') {
+    statusColor = COLORS.warning;
+    statusBg = COLORS.warningBg;
+  } else if (equipment.status === 'Quebrado') {
+    statusColor = COLORS.error;
+    statusBg = COLORS.errorBg;
+  }
 
   return (
     <TouchableOpacity
       style={styles.card}
       onPress={onPress}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={`Equipamento ${equipment.nome}`}
     >
-      {/* Ícone da categoria */}
-      <View style={[styles.iconContainer, isAvailable ? styles.iconAvailable : styles.iconBorrowed]}>
-        <Ionicons name={iconName} size={24} color="#FFFFFF" />
+      {/* ── Icon ── */}
+      <View style={[styles.iconContainer, { backgroundColor: statusBg }]}>
+        <Ionicons 
+          name={iconName} 
+          size={24} 
+          color={statusColor} 
+        />
       </View>
 
-      {/* Informações do equipamento */}
+      {/* ── Info ── */}
       <View style={styles.infoContainer}>
         <Text style={styles.name} numberOfLines={1}>
           {equipment.nome}
         </Text>
         <View style={styles.responsavelRow}>
-          <Ionicons name="person-outline" size={13} color="#7A8A9E" />
+          <Ionicons name="person-outline" size={12} color={COLORS.textMuted} />
           <Text style={styles.responsavel} numberOfLines={1}>
-            {equipment.responsavel}
+            {equipment.responsavel || 'Sem responsável'}
           </Text>
         </View>
       </View>
 
-      {/* Badge de status + seta */}
+      {/* ── Status & Action ── */}
       <View style={styles.rightSection}>
-        <View style={[styles.statusBadge, isAvailable ? styles.badgeAvailable : styles.badgeBorrowed]}>
-          <View style={[styles.statusDot, isAvailable ? styles.dotAvailable : styles.dotBorrowed]} />
-          <Text style={[styles.statusText, isAvailable ? styles.textAvailable : styles.textBorrowed]}>
+        <View style={[styles.statusBadge, { backgroundColor: statusBg }]}>
+          <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+          <Text style={[styles.statusText, { color: statusColor }]}>
             {equipment.status}
           </Text>
         </View>
-        <Ionicons name="chevron-forward" size={18} color="#C0C9D6" style={styles.chevron} />
+        <View style={styles.chevronWrap}>
+          <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -63,100 +123,86 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: RADIUS.lg,
+    paddingVertical: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     ...Platform.select({
       ios: {
-        shadowColor: '#1B2A4A',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
+        shadowColor: COLORS.textPrimary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.04,
+        shadowRadius: 8,
       },
       android: {
-        elevation: 3,
+        elevation: 2,
       },
     }),
   },
+  
+  // ── Icon ──
   iconContainer: {
-    width: 46,
-    height: 46,
-    borderRadius: 13,
+    width: 48,
+    height: 48,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
+    marginRight: SPACING.lg,
   },
-  iconAvailable: {
-    backgroundColor: '#0EA86A',
-  },
-  iconBorrowed: {
-    backgroundColor: '#1A3A6B',
-  },
+
+  // ── Info ──
   infoContainer: {
     flex: 1,
     justifyContent: 'center',
   },
   name: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#1B2A4A',
-    letterSpacing: 0.1,
-    marginBottom: 4,
+    color: COLORS.textPrimary,
+    letterSpacing: -0.2,
+    marginBottom: SPACING.xs,
   },
   responsavelRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
   },
   responsavel: {
     fontSize: 13,
-    color: '#7A8A9E',
-    fontWeight: '400',
+    color: COLORS.textSecondary,
+    fontWeight: '500',
   },
+
+  // ── Right Section ──
   rightSection: {
     alignItems: 'flex-end',
-    justifyContent: 'center',
-    marginLeft: 10,
+    justifyContent: 'space-between',
+    height: 44,
+    marginLeft: SPACING.sm,
   },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-    gap: 5,
-  },
-  badgeAvailable: {
-    backgroundColor: '#E8F9F0',
-  },
-  badgeBorrowed: {
-    backgroundColor: '#FFF3E6',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: RADIUS.pill,
+    gap: 4,
   },
   statusDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-  },
-  dotAvailable: {
-    backgroundColor: '#0EA86A',
-  },
-  dotBorrowed: {
-    backgroundColor: '#E8871E',
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
   statusText: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.2,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
   },
-  textAvailable: {
-    color: '#0EA86A',
-  },
-  textBorrowed: {
-    color: '#E8871E',
-  },
-  chevron: {
-    marginTop: 8,
+  chevronWrap: {
+    marginTop: 'auto',
   },
 });
