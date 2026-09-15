@@ -13,22 +13,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// ─── Design Tokens (UI/UX Pro Max: SaaS Enterprise) ────────────────
+// ─── Design Tokens (UI/UX Pro Max: Indigo Premium) ─────────────────
 const COLORS = {
   // Surfaces
-  bgDeep:       '#0A1628',
-  bgBody:       '#F0F4FA',
+  bgDeep:       '#0B1120',
+  bgBody:       '#F8FAFC',
   bgCard:       '#FFFFFF',
 
-  // Primary palette
-  primary:      '#3B82F6',
-  primaryBg:    'rgba(59, 130, 246, 0.1)',
+  // Primary palette — Indigo
+  primary:      '#6366F1',
+  primaryBg:    'rgba(99, 102, 241, 0.10)',
 
   // Semantic
   success:      '#10B981',
-  successBg:    'rgba(16, 185, 129, 0.12)',
+  successBg:    'rgba(16, 185, 129, 0.10)',
   warning:      '#F59E0B',
-  warningBg:    'rgba(245, 158, 11, 0.12)',
+  warningBg:    'rgba(245, 158, 11, 0.10)',
 
   // Text
   textWhite:    '#FFFFFF',
@@ -36,8 +36,8 @@ const COLORS = {
   textSecondary:'#64748B',
   textMuted:    '#94A3B8',
 
-  border:       '#E2E8F0',
-  glassBg:      'rgba(255, 255, 255, 0.1)',
+  border:       '#E8ECF4',
+  glassBg:      'rgba(255, 255, 255, 0.08)',
 };
 
 const SPACING = {
@@ -293,13 +293,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   headerTitle: {
     fontSize: 16,
     fontWeight: '700',
     color: COLORS.textWhite,
-    letterSpacing: 0.2,
+    letterSpacing: 0.1,
   },
   headerSpacer: {
     width: 44,
@@ -325,10 +325,10 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     ...Platform.select({
       ios: {
-        shadowColor: COLORS.textPrimary,
+        shadowColor: '#6366F1',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.05,
-        shadowRadius: 12,
+        shadowOpacity: 0.06,
+        shadowRadius: 16,
       },
       android: {
         elevation: 3,
@@ -471,10 +471,9 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
     ...Platform.select({
       ios: {
-        shadowColor: COLORS.textPrimary,
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 8,
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
       },
       android: {
         elevation: 3,
@@ -483,9 +482,15 @@ const styles = StyleSheet.create({
   },
   btnMarkInUse: {
     backgroundColor: COLORS.warning,
+    ...Platform.select({
+      ios: { shadowColor: '#F59E0B' },
+    }),
   },
   btnMarkAvailable: {
     backgroundColor: COLORS.success,
+    ...Platform.select({
+      ios: { shadowColor: '#10B981' },
+    }),
   },
   statusActionButtonText: {
     color: COLORS.textWhite,
@@ -505,7 +510,7 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     marginTop: SPACING.xl,
     borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.2)',
+    borderColor: 'rgba(99, 102, 241, 0.18)',
   },
   infoIconWrap: {
     marginRight: SPACING.md,

@@ -11,30 +11,30 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// ─── Design Tokens (UI/UX Pro Max: SaaS Enterprise) ────────────────
+// ─── Design Tokens (UI/UX Pro Max: Indigo Premium) ─────────────────
 const COLORS = {
-  bgDeep:       '#0A1628',
-  bgBody:       '#F0F4FA',
+  bgDeep:       '#0B1120',
+  bgBody:       '#F8FAFC',
   bgCard:       '#FFFFFF',
 
-  primary:      '#3B82F6',
-  primaryBg:    'rgba(59, 130, 246, 0.1)',
-  primaryLight: '#60A5FA',
+  primary:      '#6366F1',
+  primaryBg:    'rgba(99, 102, 241, 0.10)',
+  primaryLight: '#818CF8',
 
   success:      '#10B981',
-  successBg:    'rgba(16, 185, 129, 0.12)',
-  successGlow:  'rgba(16, 185, 129, 0.25)',
+  successBg:    'rgba(16, 185, 129, 0.10)',
+  successGlow:  'rgba(16, 185, 129, 0.20)',
 
   warning:      '#F59E0B',
-  warningBg:    'rgba(245, 158, 11, 0.12)',
+  warningBg:    'rgba(245, 158, 11, 0.10)',
 
   textWhite:    '#FFFFFF',
   textPrimary:  '#0F172A',
   textSecondary:'#64748B',
   textMuted:    '#94A3B8',
 
-  border:       '#E2E8F0',
-  glassBg:      'rgba(255, 255, 255, 0.1)',
+  border:       '#E8ECF4',
+  glassBg:      'rgba(255, 255, 255, 0.08)',
 };
 
 const SPACING = {
@@ -191,11 +191,11 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: RADIUS.md,
-    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.25)',
+    borderColor: 'rgba(16, 185, 129, 0.22)',
   },
   headerTitle: {
     fontSize: 18,
@@ -226,10 +226,10 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     ...Platform.select({
       ios: {
-        shadowColor: COLORS.textPrimary,
+        shadowColor: '#6366F1',
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.08,
-        shadowRadius: 16,
+        shadowRadius: 20,
       },
       android: {
         elevation: 4,
@@ -239,21 +239,21 @@ const styles = StyleSheet.create({
 
   // ── Success Icon ──
   iconGlowOuter: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     backgroundColor: COLORS.successBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: SPACING.xl,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: COLORS.successGlow,
   },
   iconGlowInner: {
     width: 68,
     height: 68,
     borderRadius: 34,
-    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    backgroundColor: 'rgba(16, 185, 129, 0.18)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -270,14 +270,14 @@ const styles = StyleSheet.create({
   careMessageWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(59, 130, 246, 0.08)',
+    backgroundColor: 'rgba(99, 102, 241, 0.06)',
     borderRadius: RADIUS.md,
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.xl,
     gap: SPACING.sm,
     borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.18)',
+    borderColor: 'rgba(99, 102, 241, 0.15)',
   },
   careIcon: {
     marginRight: 2,
@@ -340,10 +340,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.successBg,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: RADIUS.pill,
-    gap: 4,
+    gap: 5,
   },
   statusDot: {
     width: 6,
@@ -356,6 +356,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.success,
     textTransform: 'uppercase',
+    letterSpacing: 0.4,
   },
 
   // ── Buttons ──
@@ -371,10 +372,10 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     ...Platform.select({
       ios: {
-        shadowColor: COLORS.primary,
+        shadowColor: '#6366F1',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
-        shadowRadius: 8,
+        shadowRadius: 10,
       },
       android: {
         elevation: 3,

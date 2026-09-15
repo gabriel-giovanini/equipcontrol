@@ -15,7 +15,7 @@ export default function AppNavigator() {
       screenOptions={{
         headerShown: false,
         animation: 'slide_from_right',
-        contentStyle: { backgroundColor: '#0A1628' },
+        contentStyle: { backgroundColor: '#0B1120' },
       }}
     >
       <Stack.Screen

@@ -8,28 +8,28 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-// ─── Design Tokens (UI/UX Pro Max: SaaS Enterprise) ────────────────
+// ─── Design Tokens (UI/UX Pro Max: Indigo Premium) ─────────────────
 const COLORS = {
   bgCard:       '#FFFFFF',
   
-  primary:      '#3B82F6',
-  primaryLight: '#60A5FA',
-  primaryBg:    'rgba(59, 130, 246, 0.1)',
+  primary:      '#6366F1',
+  primaryLight: '#818CF8',
+  primaryBg:    'rgba(99, 102, 241, 0.10)',
 
   success:      '#10B981',
-  successBg:    'rgba(16, 185, 129, 0.12)',
+  successBg:    'rgba(16, 185, 129, 0.10)',
   
   warning:      '#F59E0B',
-  warningBg:    'rgba(245, 158, 11, 0.12)',
+  warningBg:    'rgba(245, 158, 11, 0.10)',
 
   error:        '#EF4444',
-  errorBg:      'rgba(239, 68, 68, 0.12)',
+  errorBg:      'rgba(239, 68, 68, 0.10)',
 
   textPrimary:  '#0F172A',
   textSecondary:'#64748B',
   textMuted:    '#94A3B8',
 
-  border:       '#E2E8F0',
+  border:       '#E8ECF4',
 };
 
 const SPACING = {
@@ -132,10 +132,10 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     ...Platform.select({
       ios: {
-        shadowColor: COLORS.textPrimary,
+        shadowColor: '#6366F1',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.04,
-        shadowRadius: 8,
+        shadowOpacity: 0.06,
+        shadowRadius: 12,
       },
       android: {
         elevation: 2,
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
     marginBottom: SPACING.xs,
   },
   responsavelRow: {
@@ -186,10 +186,10 @@ const styles = StyleSheet.create({
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: RADIUS.pill,
-    gap: 4,
+    gap: 5,
   },
   statusDot: {
     width: 6,
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 10,
     fontWeight: '700',
-    letterSpacing: 0.3,
+    letterSpacing: 0.4,
     textTransform: 'uppercase',
   },
   chevronWrap: {

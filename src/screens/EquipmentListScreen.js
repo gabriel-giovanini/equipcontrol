@@ -16,39 +16,39 @@ import { useFocusEffect } from '@react-navigation/native';
 import EquipmentCard from '../components/EquipmentCard';
 import defaultEquipments from '../data/equipments';
 
-// ─── Design Tokens (UI/UX Pro Max: SaaS Enterprise) ────────────────
+// ─── Design Tokens (UI/UX Pro Max: Indigo Premium) ─────────────────
 const COLORS = {
   // Surfaces
-  bgDeep:       '#0A1628',
-  bgHeader:     '#0F1D32',
-  bgBody:       '#F0F4FA',
+  bgDeep:       '#0B1120',
+  bgHeader:     '#0F1729',
+  bgBody:       '#F8FAFC',
   bgCard:       '#FFFFFF',
-  bgModal:      'rgba(10, 22, 40, 0.6)',
+  bgModal:      'rgba(11, 17, 32, 0.6)',
 
-  // Primary palette
-  primary:      '#3B82F6',
-  primaryDark:  '#1D4ED8',
-  primaryLight: '#60A5FA',
+  // Primary palette — Indigo (premium, not generic blue)
+  primary:      '#6366F1',
+  primaryDark:  '#4F46E5',
+  primaryLight: '#818CF8',
 
   // Semantic
   success:      '#10B981',
-  successBg:    'rgba(16, 185, 129, 0.12)',
+  successBg:    'rgba(16, 185, 129, 0.10)',
   warning:      '#F59E0B',
-  warningBg:    'rgba(245, 158, 11, 0.12)',
+  warningBg:    'rgba(245, 158, 11, 0.10)',
   error:        '#EF4444',
-  errorBg:      'rgba(239, 68, 68, 0.12)',
+  errorBg:      'rgba(239, 68, 68, 0.10)',
 
   // Text
   textWhite:    '#FFFFFF',
   textPrimary:  '#0F172A',
   textSecondary:'#64748B',
   textMuted:    '#94A3B8',
-  textOnDark:   'rgba(255, 255, 255, 0.6)',
+  textOnDark:   'rgba(255, 255, 255, 0.55)',
 
   // Glass & Border
-  glassBg:      'rgba(255, 255, 255, 0.08)',
-  glassBorder:  'rgba(255, 255, 255, 0.12)',
-  border:       '#E2E8F0',
+  glassBg:      'rgba(255, 255, 255, 0.06)',
+  glassBorder:  'rgba(255, 255, 255, 0.10)',
+  border:       '#E8ECF4',
 };
 
 const SPACING = { xs: 4, sm: 8, md: 12, lg: 16, xl: 20, xxl: 24, xxxl: 32 };
@@ -109,7 +109,7 @@ export default function EquipmentListScreen({ navigation }) {
         <View style={styles.headerTop}>
           <View style={styles.headerTitleGroup}>
             <View style={styles.logoMark}>
-              <Ionicons name="cube" size={18} color={COLORS.primary} />
+              <Ionicons name="cube" size={18} color={COLORS.primaryLight} />
             </View>
             <View>
               <Text style={styles.headerGreeting}>Controle de</Text>
@@ -280,28 +280,28 @@ const styles = StyleSheet.create({
   },
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.xxl },
   headerTitleGroup: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
-  logoMark: { width: 40, height: 40, borderRadius: RADIUS.md, backgroundColor: 'rgba(59, 130, 246, 0.15)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(59, 130, 246, 0.2)' },
+  logoMark: { width: 40, height: 40, borderRadius: RADIUS.md, backgroundColor: 'rgba(99, 102, 241, 0.15)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(99, 102, 241, 0.25)' },
   headerGreeting: { fontSize: 12, color: COLORS.textOnDark, fontWeight: '500', letterSpacing: 0.8, textTransform: 'uppercase' },
   headerTitle: { fontSize: 22, fontWeight: '800', color: COLORS.textWhite, letterSpacing: -0.5, marginTop: 1 },
 
   // ── Stats ──
   statsRow: { flexDirection: 'row', gap: SPACING.sm },
   statCard: { flex: 1, backgroundColor: COLORS.glassBg, borderRadius: RADIUS.lg, paddingVertical: SPACING.lg, paddingHorizontal: SPACING.md, alignItems: 'center', borderWidth: 1.5, borderColor: COLORS.glassBorder },
-  statCardAccent: { backgroundColor: 'rgba(59, 130, 246, 0.12)', borderColor: 'rgba(59, 130, 246, 0.2)' },
+  statCardAccent: { backgroundColor: 'rgba(99, 102, 241, 0.10)', borderColor: 'rgba(99, 102, 241, 0.20)' },
   statCardActiveTotal: {
     borderColor: COLORS.primary,
-    backgroundColor: 'rgba(59, 130, 246, 0.28)',
+    backgroundColor: 'rgba(99, 102, 241, 0.22)',
   },
   statIconWrapActiveTotal: {
     backgroundColor: '#FFFFFF',
   },
   statCardActiveWarning: {
     borderColor: COLORS.warning,
-    backgroundColor: 'rgba(245, 158, 11, 0.24)',
+    backgroundColor: 'rgba(245, 158, 11, 0.18)',
   },
   statCardActiveSuccess: {
     borderColor: COLORS.success,
-    backgroundColor: 'rgba(16, 185, 129, 0.24)',
+    backgroundColor: 'rgba(16, 185, 129, 0.18)',
   },
   statLabelActiveTotal: {
     color: COLORS.textWhite,
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     marginTop: 4,
   },
-  statIconWrap: { width: 32, height: 32, borderRadius: RADIUS.sm, backgroundColor: 'rgba(59, 130, 246, 0.15)', alignItems: 'center', justifyContent: 'center', marginBottom: SPACING.sm },
+  statIconWrap: { width: 32, height: 32, borderRadius: RADIUS.sm, backgroundColor: 'rgba(99, 102, 241, 0.15)', alignItems: 'center', justifyContent: 'center', marginBottom: SPACING.sm },
   statNumber: { fontSize: 24, fontWeight: '800', color: COLORS.textWhite, letterSpacing: -0.5 },
   statLabel: { fontSize: 10, color: COLORS.textOnDark, fontWeight: '600', marginTop: SPACING.xs, letterSpacing: 0.5, textTransform: 'uppercase' },
 
@@ -331,8 +331,8 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.lg },
   sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   sectionIndicator: { width: 3, height: 18, borderRadius: 2, backgroundColor: COLORS.primary },
-  sectionTitle: { fontSize: 17, fontWeight: '700', color: COLORS.textPrimary, letterSpacing: -0.2 },
-  sectionBadge: { backgroundColor: 'rgba(59, 130, 246, 0.1)', paddingHorizontal: SPACING.md, paddingVertical: SPACING.xs, borderRadius: RADIUS.pill },
+  sectionTitle: { fontSize: 17, fontWeight: '700', color: COLORS.textPrimary, letterSpacing: -0.3 },
+  sectionBadge: { backgroundColor: 'rgba(99, 102, 241, 0.08)', paddingHorizontal: SPACING.md, paddingVertical: SPACING.xs, borderRadius: RADIUS.pill },
   sectionCount: { fontSize: 12, color: COLORS.primary, fontWeight: '700' },
   listContent: { paddingBottom: 100 },
 
@@ -343,9 +343,9 @@ const styles = StyleSheet.create({
     right: SPACING.xxl,
     ...Platform.select({
       ios: {
-        shadowColor: COLORS.primary,
+        shadowColor: '#6366F1',
         shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.4,
+        shadowOpacity: 0.35,
         shadowRadius: 16,
       },
       android: {
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(96, 165, 250, 0.3)',
+    borderColor: 'rgba(129, 140, 248, 0.35)',
   },
 
   // ── Empty State ──

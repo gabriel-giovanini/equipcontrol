@@ -15,35 +15,35 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// ─── Design Tokens (UI/UX Pro Max: SaaS Enterprise) ────────────────
+// ─── Design Tokens (UI/UX Pro Max: Indigo Premium) ─────────────────
 const COLORS = {
   // Surfaces
-  bgDeep:       '#0A1628',
-  bgBody:       '#F0F4FA',
+  bgDeep:       '#0B1120',
+  bgBody:       '#F8FAFC',
   bgCard:       '#FFFFFF',
 
-  // Primary palette
-  primary:      '#3B82F6',
-  primaryBg:    'rgba(59, 130, 246, 0.1)',
-  primaryLight: '#60A5FA',
+  // Primary palette — Indigo
+  primary:      '#6366F1',
+  primaryBg:    'rgba(99, 102, 241, 0.10)',
+  primaryLight: '#818CF8',
 
   // Semantic
   success:      '#10B981',
-  successBg:    'rgba(16, 185, 129, 0.12)',
+  successBg:    'rgba(16, 185, 129, 0.10)',
   warning:      '#F59E0B',
-  warningBg:    'rgba(245, 158, 11, 0.12)',
+  warningBg:    'rgba(245, 158, 11, 0.10)',
   error:        '#EF4444',
-  errorBg:      'rgba(239, 68, 68, 0.12)',
+  errorBg:      'rgba(239, 68, 68, 0.10)',
 
   // Text
   textWhite:    '#FFFFFF',
   textPrimary:  '#0F172A',
   textSecondary:'#64748B',
   textMuted:    '#94A3B8',
-  textOnDark:   'rgba(255, 255, 255, 0.6)',
+  textOnDark:   'rgba(255, 255, 255, 0.55)',
 
-  border:       '#E2E8F0',
-  glassBg:      'rgba(255, 255, 255, 0.1)',
+  border:       '#E8ECF4',
+  glassBg:      'rgba(255, 255, 255, 0.08)',
 };
 
 const SPACING = {
@@ -332,13 +332,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   headerTitle: {
     fontSize: 17,
     fontWeight: '700',
     color: COLORS.textWhite,
-    letterSpacing: 0.2,
+    letterSpacing: 0.1,
   },
   headerSpacer: {
     width: 44,
@@ -365,10 +365,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     ...Platform.select({
       ios: {
-        shadowColor: COLORS.textPrimary,
+        shadowColor: '#6366F1',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.05,
-        shadowRadius: 12,
+        shadowOpacity: 0.06,
+        shadowRadius: 16,
       },
       android: {
         elevation: 3,
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F8FAFC',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: COLORS.border,
     borderRadius: RADIUS.md,
     paddingHorizontal: SPACING.md,
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: RADIUS.pill,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: COLORS.border,
   },
   chipSelected: {
@@ -486,7 +486,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: SPACING.xxl,
     borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.2)',
+    borderColor: 'rgba(99, 102, 241, 0.18)',
   },
   statusNoticeText: {
     flex: 1,
@@ -510,10 +510,10 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.lg,
     ...Platform.select({
       ios: {
-        shadowColor: COLORS.primary,
+        shadowColor: '#6366F1',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
-        shadowRadius: 8,
+        shadowRadius: 10,
       },
       android: {
         elevation: 4,
