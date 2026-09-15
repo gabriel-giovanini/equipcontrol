@@ -14,8 +14,21 @@ Para rodar o aplicativo e avaliar nosso trabalho, por favor siga os passos abaix
 
 4. O terminal exibirá um QR Code. Você pode escaneá-lo com o aplicativo "Expo Go" no seu celular, ou pressionar a tecla "w" no terminal para visualizar no navegador (caso prefira testar a versão web).
 
-Telas desenvolvidas nesta Fase 1:
-- Tela de Lista de Equipamentos (com dados estáticos e botão flutuante).
-- Tela de Detalhes do Equipamento (navegação funcionando ao clicar em um item).
+Telas e Funcionalidades desenvolvidas (Fase 2 - Formulário, AsyncStorage e Navegação):
+1. Formulário (EquipmentFormScreen):
+   - Abertura via navegação pelo botão flutuante (+) na lista.
+   - Campos: Nome (obrigatório), Categoria (com chips interativos) e Responsável Inicial.
+   - Validação com alerta quando o nome não for preenchido.
+   - Salvamento e persistência no AsyncStorage com retorno automático à lista.
+
+2. Lista (EquipmentListScreen):
+   - Carregamento inicial e revalidação dinâmica do AsyncStorage ao receber foco (useFocusEffect).
+   - Indicadores visuais de status (badges coloridos, contadores em tempo real de Total, Em Uso e Disponíveis).
+   - Navegação para a tela de detalhes ao clicar em qualquer cartão.
+
+3. Detalhes (EquipmentDetailScreen):
+   - Exibição completa das informações do equipamento.
+   - Botão para marcar/desmarcar o status ("Marcar como Em Uso" / "Marcar como Disponível").
+   - Persistência imediata no AsyncStorage e retorno à lista atualizada.
 
 Agradecemos a avaliação!

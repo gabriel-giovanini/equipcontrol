@@ -1,16 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Alert,
   Platform,
-  Modal,
-  TextInput,
-  KeyboardAvoidingView,
-  ScrollView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -64,12 +59,6 @@ const ASYNC_STORAGE_KEY = '@equipments_v1';
 export default function EquipmentListScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const [equipments, setEquipments] = useState([]);
-  
-  // Modal & Form State
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [nome, setNome] = useState('');
-  const [categoria, setCategoria] = useState('');
-  const [responsavel, setResponsavel] = useState('');
 
   // Load Data
   const loadEquipments = async () => {
@@ -92,47 +81,24 @@ export default function EquipmentListScreen({ navigation }) {
     }
   };
 
-  // Reload when screen gets focus (in case detail screen updates status)
+  // Reload when screen gets focus (in case detail screen updates status or new equipment is added)
   useFocusEffect(
     React.useCallback(() => {
       loadEquipments();
     }, [])
   );
 
+  const [selectedFilter, setSelectedFilter] = useState('ALL'); // 'ALL' | 'Em uso' | 'Disponível'
+
   const totalEquipments = equipments.length;
   const emUso = equipments.filter((e) => e.status === 'Em uso').length;
   const disponiveis = equipments.filter((e) => e.status === 'Disponível').length;
 
-  const handleSaveEquipment = async () => {
-    if (!nome.trim()) {
-      Alert.alert('Atenção', 'O nome do equipamento é obrigatório.');
-      return;
-    }
-
-    const newEquipment = {
-      id: Date.now().toString(),
-      nome: nome.trim(),
-      categoria: categoria.trim() || 'Outros',
-      responsavel: responsavel.trim() || 'Não atribuído',
-      status: 'Disponível', // Status padrão
-      dataEmprestimo: null,
-      dataDevolucao: null,
-    };
-
-    try {
-      const updatedList = [...equipments, newEquipment];
-      await AsyncStorage.setItem(ASYNC_STORAGE_KEY, JSON.stringify(updatedList));
-      setEquipments(updatedList);
-      
-      // Limpa e fecha modal
-      setNome('');
-      setCategoria('');
-      setResponsavel('');
-      setModalVisible(false);
-    } catch (error) {
-      Alert.alert('Erro', 'Não foi possível salvar o equipamento.');
-    }
-  };
+  // Filtragem dinâmica com base no card de estatística clicado
+  const filteredEquipments = equipments.filter((item) => {
+    if (selectedFilter === 'ALL') return true;
+    return item.status === selectedFilter;
+  });
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -152,31 +118,75 @@ export default function EquipmentListScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Stats Row */}
+        {/* Stats Row com Filtros Clicáveis */}
         <View style={styles.statsRow}>
-          <View style={[styles.statCard, styles.statCardAccent]}>
-            <View style={styles.statIconWrap}>
-              <Ionicons name="layers-outline" size={18} color={COLORS.primaryLight} />
+          {/* Card Total */}
+          <TouchableOpacity
+            style={[
+              styles.statCard,
+              styles.statCardAccent,
+              selectedFilter === 'ALL' && styles.statCardActiveTotal,
+            ]}
+            onPress={() => setSelectedFilter('ALL')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Filtrar todos os equipamentos"
+          >
+            <View style={[styles.statIconWrap, selectedFilter === 'ALL' && styles.statIconWrapActiveTotal]}>
+              <Ionicons
+                name="layers-outline"
+                size={18}
+                color={selectedFilter === 'ALL' ? COLORS.primary : COLORS.primaryLight}
+              />
             </View>
             <Text style={styles.statNumber}>{totalEquipments}</Text>
-            <Text style={styles.statLabel}>Total</Text>
-          </View>
+            <Text style={[styles.statLabel, selectedFilter === 'ALL' && styles.statLabelActiveTotal]}>
+              Total
+            </Text>
+            {selectedFilter === 'ALL' && <View style={styles.activeDot} />}
+          </TouchableOpacity>
 
-          <View style={styles.statCard}>
+          {/* Card Em Uso */}
+          <TouchableOpacity
+            style={[
+              styles.statCard,
+              selectedFilter === 'Em uso' && styles.statCardActiveWarning,
+            ]}
+            onPress={() => setSelectedFilter('Em uso')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Filtrar equipamentos em uso"
+          >
             <View style={[styles.statIconWrap, { backgroundColor: COLORS.warningBg }]}>
               <Ionicons name="arrow-redo-outline" size={16} color={COLORS.warning} />
             </View>
             <Text style={[styles.statNumber, { color: COLORS.warning }]}>{emUso}</Text>
-            <Text style={styles.statLabel}>Em Uso</Text>
-          </View>
+            <Text style={[styles.statLabel, selectedFilter === 'Em uso' && styles.statLabelActiveWarning]}>
+              Em Uso
+            </Text>
+            {selectedFilter === 'Em uso' && <View style={[styles.activeDot, { backgroundColor: COLORS.warning }]} />}
+          </TouchableOpacity>
 
-          <View style={styles.statCard}>
+          {/* Card Disponíveis */}
+          <TouchableOpacity
+            style={[
+              styles.statCard,
+              selectedFilter === 'Disponível' && styles.statCardActiveSuccess,
+            ]}
+            onPress={() => setSelectedFilter('Disponível')}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Filtrar equipamentos disponíveis"
+          >
             <View style={[styles.statIconWrap, { backgroundColor: COLORS.successBg }]}>
               <Ionicons name="checkmark-circle-outline" size={16} color={COLORS.success} />
             </View>
             <Text style={[styles.statNumber, { color: COLORS.success }]}>{disponiveis}</Text>
-            <Text style={styles.statLabel}>Disponíveis</Text>
-          </View>
+            <Text style={[styles.statLabel, selectedFilter === 'Disponível' && styles.statLabelActiveSuccess]}>
+              Disponíveis
+            </Text>
+            {selectedFilter === 'Disponível' && <View style={[styles.activeDot, { backgroundColor: COLORS.success }]} />}
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -184,16 +194,36 @@ export default function EquipmentListScreen({ navigation }) {
       <View style={styles.body}>
         <View style={styles.sectionHeader}>
           <View style={styles.sectionTitleRow}>
-            <View style={styles.sectionIndicator} />
-            <Text style={styles.sectionTitle}>Equipamentos</Text>
+            <View
+              style={[
+                styles.sectionIndicator,
+                selectedFilter === 'Em uso' && { backgroundColor: COLORS.warning },
+                selectedFilter === 'Disponível' && { backgroundColor: COLORS.success },
+              ]}
+            />
+            <Text style={styles.sectionTitle}>
+              {selectedFilter === 'ALL'
+                ? 'Todos os Equipamentos'
+                : selectedFilter === 'Em uso'
+                ? 'Equipamentos Em Uso'
+                : 'Equipamentos Disponíveis'}
+            </Text>
           </View>
           <View style={styles.sectionBadge}>
-            <Text style={styles.sectionCount}>{totalEquipments}</Text>
+            <Text
+              style={[
+                styles.sectionCount,
+                selectedFilter === 'Em uso' && { color: COLORS.warning },
+                selectedFilter === 'Disponível' && { color: COLORS.success },
+              ]}
+            >
+              {filteredEquipments.length}
+            </Text>
           </View>
         </View>
 
         <FlatList
-          data={equipments}
+          data={filteredEquipments}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <EquipmentCard
@@ -201,86 +231,38 @@ export default function EquipmentListScreen({ navigation }) {
               onPress={() => navigation.navigate('EquipmentDetail', { equipment: item })}
             />
           )}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Ionicons name="cube-outline" size={48} color={COLORS.textMuted} />
+              <Text style={styles.emptyTitle}>
+                {selectedFilter === 'ALL'
+                  ? 'Nenhum equipamento cadastrado'
+                  : `Nenhum equipamento "${selectedFilter}"`}
+              </Text>
+              <Text style={styles.emptySubtitle}>
+                {selectedFilter === 'ALL'
+                  ? 'Toque no botão "+" abaixo para adicionar o primeiro equipamento.'
+                  : 'Toque em "Total" acima para visualizar todos os registros.'}
+              </Text>
+            </View>
+          }
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
         />
       </View>
 
-      {/* ── FAB ── */}
+      {/* ── FAB (Navegação para formulário de cadastro) ── */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => setModalVisible(true)}
+        onPress={() => navigation.navigate('EquipmentForm')}
         activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="Adicionar Equipamento"
       >
         <View style={styles.fabInner}>
           <Ionicons name="add" size={26} color={COLORS.textWhite} />
         </View>
       </TouchableOpacity>
-
-      {/* ── Modal Form ── */}
-      <Modal
-        visible={isModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <KeyboardAvoidingView
-          style={styles.modalOverlay}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Novo Equipamento</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Ionicons name="close-circle-outline" size={28} color={COLORS.textSecondary} />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView contentContainerStyle={styles.formContainer}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Nome (Obrigatório) *</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Ex: Notebook Dell"
-                  placeholderTextColor={COLORS.textMuted}
-                  value={nome}
-                  onChangeText={setNome}
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Categoria</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Ex: Notebook, Projetor, etc."
-                  placeholderTextColor={COLORS.textMuted}
-                  value={categoria}
-                  onChangeText={setCategoria}
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Responsável Inicial</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Ex: João Silva"
-                  placeholderTextColor={COLORS.textMuted}
-                  value={responsavel}
-                  onChangeText={setResponsavel}
-                />
-              </View>
-
-              <TouchableOpacity
-                style={styles.saveButton}
-                onPress={handleSaveEquipment}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.saveButtonText}>Salvar Equipamento</Text>
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
     </View>
   );
 }
@@ -304,8 +286,42 @@ const styles = StyleSheet.create({
 
   // ── Stats ──
   statsRow: { flexDirection: 'row', gap: SPACING.sm },
-  statCard: { flex: 1, backgroundColor: COLORS.glassBg, borderRadius: RADIUS.lg, paddingVertical: SPACING.lg, paddingHorizontal: SPACING.md, alignItems: 'center', borderWidth: 1, borderColor: COLORS.glassBorder },
+  statCard: { flex: 1, backgroundColor: COLORS.glassBg, borderRadius: RADIUS.lg, paddingVertical: SPACING.lg, paddingHorizontal: SPACING.md, alignItems: 'center', borderWidth: 1.5, borderColor: COLORS.glassBorder },
   statCardAccent: { backgroundColor: 'rgba(59, 130, 246, 0.12)', borderColor: 'rgba(59, 130, 246, 0.2)' },
+  statCardActiveTotal: {
+    borderColor: COLORS.primary,
+    backgroundColor: 'rgba(59, 130, 246, 0.28)',
+  },
+  statIconWrapActiveTotal: {
+    backgroundColor: '#FFFFFF',
+  },
+  statCardActiveWarning: {
+    borderColor: COLORS.warning,
+    backgroundColor: 'rgba(245, 158, 11, 0.24)',
+  },
+  statCardActiveSuccess: {
+    borderColor: COLORS.success,
+    backgroundColor: 'rgba(16, 185, 129, 0.24)',
+  },
+  statLabelActiveTotal: {
+    color: COLORS.textWhite,
+    fontWeight: '800',
+  },
+  statLabelActiveWarning: {
+    color: COLORS.warning,
+    fontWeight: '800',
+  },
+  statLabelActiveSuccess: {
+    color: COLORS.success,
+    fontWeight: '800',
+  },
+  activeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.primary,
+    marginTop: 4,
+  },
   statIconWrap: { width: 32, height: 32, borderRadius: RADIUS.sm, backgroundColor: 'rgba(59, 130, 246, 0.15)', alignItems: 'center', justifyContent: 'center', marginBottom: SPACING.sm },
   statNumber: { fontSize: 24, fontWeight: '800', color: COLORS.textWhite, letterSpacing: -0.5 },
   statLabel: { fontSize: 10, color: COLORS.textOnDark, fontWeight: '600', marginTop: SPACING.xs, letterSpacing: 0.5, textTransform: 'uppercase' },
@@ -322,67 +338,50 @@ const styles = StyleSheet.create({
 
   // ── FAB ──
   fab: {
-    position: 'absolute', bottom: 32, right: SPACING.xxl,
-    ...Platform.select({ ios: { shadowColor: COLORS.primary, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 16 }, android: { elevation: 12 } }),
+    position: 'absolute',
+    bottom: 32,
+    right: SPACING.xxl,
+    ...Platform.select({
+      ios: {
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.4,
+        shadowRadius: 16,
+      },
+      android: {
+        elevation: 12,
+      },
+    }),
   },
-  fabInner: { width: 56, height: 56, borderRadius: 16, backgroundColor: COLORS.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(96, 165, 250, 0.3)' },
-
-  // ── Modal Form ──
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: COLORS.bgModal,
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: COLORS.bgCard,
-    borderTopLeftRadius: RADIUS.xxl,
-    borderTopRightRadius: RADIUS.xxl,
-    padding: SPACING.xl,
-    maxHeight: '90%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.xl,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: COLORS.textPrimary,
-  },
-  formContainer: {
-    paddingBottom: SPACING.xxxl,
-  },
-  inputGroup: {
-    marginBottom: SPACING.lg,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.xs,
-  },
-  input: {
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: RADIUS.md,
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    fontSize: 15,
-    color: COLORS.textPrimary,
-  },
-  saveButton: {
+  fabInner: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
     backgroundColor: COLORS.primary,
-    borderRadius: RADIUS.lg,
-    paddingVertical: SPACING.lg,
     alignItems: 'center',
-    marginTop: SPACING.md,
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(96, 165, 250, 0.3)',
   },
-  saveButtonText: {
-    color: COLORS.textWhite,
+
+  // ── Empty State ──
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.xxxl * 2,
+    paddingHorizontal: SPACING.xl,
+  },
+  emptyTitle: {
     fontSize: 16,
     fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.xs,
+  },
+  emptySubtitle: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 18,
   },
 });

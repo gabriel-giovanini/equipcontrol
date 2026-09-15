@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,10 +6,12 @@ import {
   ScrollView,
   TouchableOpacity,
   Platform,
+  Alert,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ─── Design Tokens (UI/UX Pro Max: SaaS Enterprise) ────────────────
 const COLORS = {
@@ -57,11 +59,58 @@ const RADIUS = {
   pill: 100,
 };
 
+const ASYNC_STORAGE_KEY = '@equipments_v1';
+
 export default function EquipmentDetailScreen({ route, navigation }) {
   const insets = useSafeAreaInsets();
-  const { equipment } = route.params;
+  const { equipment: initialEquipment } = route.params;
+  const [equipment, setEquipment] = useState(initialEquipment);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const isAvailable = equipment.status === 'Disponível';
+
+  const handleToggleStatus = async () => {
+    setIsUpdating(true);
+    const newStatus = isAvailable ? 'Em uso' : 'Disponível';
+    const isNowInUse = newStatus === 'Em uso';
+    const today = new Date().toLocaleDateString('pt-BR');
+
+    const updatedEquipment = {
+      ...equipment,
+      status: newStatus,
+      dataEmprestimo: isNowInUse ? (equipment.dataEmprestimo || today) : null,
+      dataDevolucao: isNowInUse ? null : today,
+    };
+
+    try {
+      const storedData = await AsyncStorage.getItem(ASYNC_STORAGE_KEY);
+      let list = storedData ? JSON.parse(storedData) : [];
+      const index = list.findIndex((item) => item.id === equipment.id);
+      if (index !== -1) {
+        list[index] = updatedEquipment;
+      } else {
+        list.push(updatedEquipment);
+      }
+      await AsyncStorage.setItem(ASYNC_STORAGE_KEY, JSON.stringify(list));
+      setEquipment(updatedEquipment);
+
+      Alert.alert(
+        'Status Atualizado',
+        `O status do equipamento foi alterado para "${newStatus}".`,
+        [
+          {
+            text: 'OK',
+            onPress: () => navigation.goBack(),
+          },
+        ]
+      );
+    } catch (error) {
+      console.error('Erro ao atualizar status:', error);
+      Alert.alert('Erro', 'Não foi possível atualizar o status no armazenamento.');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -116,15 +165,20 @@ export default function EquipmentDetailScreen({ route, navigation }) {
             <DetailItem
               icon="person"
               label="Responsável Atual"
-              value={equipment.responsavel}
+              value={equipment.responsavel || 'Sem responsável'}
             />
             <DetailItem
               icon="grid"
               label="Categoria"
-              value={equipment.categoria}
+              value={equipment.categoria || 'Geral'}
             />
             <DetailItem
               icon="calendar"
+              label="Data de Cadastro"
+              value={equipment.dataCadastro || '—'}
+            />
+            <DetailItem
+              icon="arrow-redo"
               label="Data de Retirada"
               value={equipment.dataEmprestimo || '—'}
             />
@@ -135,17 +189,53 @@ export default function EquipmentDetailScreen({ route, navigation }) {
               isLast
             />
           </View>
+
+          <View style={styles.divider} />
+
+          {/* Action Section (Marcar / Desmarcar Status) */}
+          <View style={styles.actionSection}>
+            <Text style={styles.actionTitle}>Alterar Estado do Registro</Text>
+            <Text style={styles.actionDescription}>
+              {isAvailable
+                ? 'Equipamento disponível no inventário. Clique para marcar como em uso.'
+                : 'Equipamento em uso no momento. Clique para registrar devolução.'}
+            </Text>
+
+            <TouchableOpacity
+              style={[
+                styles.statusActionButton,
+                isAvailable ? styles.btnMarkInUse : styles.btnMarkAvailable,
+                isUpdating && styles.buttonDisabled,
+              ]}
+              onPress={handleToggleStatus}
+              activeOpacity={0.85}
+              disabled={isUpdating}
+            >
+              <Ionicons
+                name={isAvailable ? 'arrow-redo-outline' : 'checkmark-circle-outline'}
+                size={20}
+                color={COLORS.textWhite}
+              />
+              <Text style={styles.statusActionButtonText}>
+                {isUpdating
+                  ? 'Salvando...'
+                  : isAvailable
+                  ? 'Marcar como Em Uso'
+                  : 'Marcar como Disponível'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Action Info Card */}
         <View style={styles.infoCard}>
           <View style={styles.infoIconWrap}>
-            <Ionicons name="bulb-outline" size={20} color={COLORS.primary} />
+            <Ionicons name="cloud-done-outline" size={20} color={COLORS.primary} />
           </View>
           <View style={styles.infoContent}>
-            <Text style={styles.infoTitle}>Dica</Text>
+            <Text style={styles.infoTitle}>Persistência com AsyncStorage</Text>
             <Text style={styles.infoText}>
-              Funções de edição, histórico e devolução estarão disponíveis na próxima versão do sistema.
+              O status e datas são sincronizados no armazenamento local imediatamente e recarregados na listagem.
             </Text>
           </View>
         </View>
@@ -351,6 +441,60 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.textPrimary,
     fontWeight: '700',
+  },
+
+  // ── Action Section ──
+  actionSection: {
+    padding: SPACING.xxl,
+    backgroundColor: '#F8FAFC',
+  },
+  actionTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    letterSpacing: -0.2,
+    marginBottom: 4,
+  },
+  actionDescription: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
+    marginBottom: SPACING.lg,
+  },
+  statusActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.lg,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: RADIUS.lg,
+    gap: SPACING.sm,
+    ...Platform.select({
+      ios: {
+        shadowColor: COLORS.textPrimary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
+  },
+  btnMarkInUse: {
+    backgroundColor: COLORS.warning,
+  },
+  btnMarkAvailable: {
+    backgroundColor: COLORS.success,
+  },
+  statusActionButtonText: {
+    color: COLORS.textWhite,
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
 
   // ── Info Card ──
