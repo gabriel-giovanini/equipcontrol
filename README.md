@@ -17,6 +17,29 @@ TechControl — Projeto PAM I
 
 Controle de equipamentos — cadastro, empréstimos, devoluções, manutenções e painel de informações.
 
+## Como rodar o projeto
+
+Projeto criado com [`create-expo-app`](https://www.npmjs.com/package/create-expo-app) (Expo / React Native).
+
+> [!NOTE]
+> A pasta `node_modules` foi removida para envio. Veja o [`INSTRUCOES.txt`](./INSTRUCOES.txt) para o passo a passo detalhado.
+
+1. Instale as dependências
+
+   ```bash
+   npm install
+   ```
+
+2. Inicie o app
+
+   ```bash
+   npm start
+   ```
+
+3. Abra no seu dispositivo ou emulador:
+   - **Expo Go**: escaneie o QR Code exibido no terminal
+   - **Web**: pressione `w` no terminal
+
 ## Fichas de Entrega
 
 | Fase | Descrição | Prazo | Link |
