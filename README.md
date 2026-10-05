@@ -1,5 +1,21 @@
 # EquipControl
 
+<!-- PAM-CI-NOTA-INICIO -->
+### Nota atual (automática) — TechControl (equipamentos)
+
+[![CI](https://github.com/gabriel-giovanini/equipcontrol/actions/workflows/pam-ci.yml/badge.svg)](https://github.com/gabriel-giovanini/equipcontrol/actions/workflows/pam-ci.yml) [![Nota](https://img.shields.io/badge/Nota%20PAM%20I-B-yellow)](https://github.com/gabriel-giovanini/equipcontrol/actions/workflows/pam-ci.yml)
+
+**B** — Bom · **56%** (31/55 pontos) · atualizado em 2026-10-05 23:24
+
+| Fase | Pontos |
+|------|--------|
+| Fase 1 — Estrutura | 10/10 |
+| Fase 2 — AsyncStorage | 13/15 |
+| Fase 3 — SQLite | 8/30 |
+
+Checklist item a item em [NOTA.md](NOTA.md) · [ver a rodada mais recente no Actions](https://github.com/gabriel-giovanini/equipcontrol/actions/workflows/pam-ci.yml)
+<!-- PAM-CI-NOTA-FIM -->
+
 TechControl — Projeto PAM I
 
 ---
