@@ -5,7 +5,7 @@
 
 [![CI](https://github.com/gabriel-giovanini/equipcontrol/actions/workflows/pam-ci.yml/badge.svg)](https://github.com/gabriel-giovanini/equipcontrol/actions/workflows/pam-ci.yml) [![Nota](https://img.shields.io/badge/Nota%20PAM%20I-B-yellow)](https://github.com/gabriel-giovanini/equipcontrol/actions/workflows/pam-ci.yml)
 
-**B** — Bom · **56%** (31/55 pontos) · atualizado em 2026-10-26 22:50
+**B** — Bom · **56%** (31/55 pontos) · atualizado em 2026-10-26 23:27
 
 | Fase | Pontos |
 |------|--------|
