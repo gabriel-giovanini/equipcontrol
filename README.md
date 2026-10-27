@@ -87,6 +87,7 @@ Projeto criado com [`create-expo-app`](https://www.npmjs.com/package/create-expo
 > Material completo do curso: [PAM I](https://etec-bento-quirino.github.io/Programacao-Aplicativos-Moveis-I/)
 
 
+
 ---
 
 ## Colaboração por integrante
@@ -95,7 +96,7 @@ Projeto criado com [`create-expo-app`](https://www.npmjs.com/package/create-expo
 
 | # | Integrante | Commits | Participação |
 |---|------------|---------|--------------|
-| 1 | Allan1605 | 4 | 57.1% ███████████░░░░░░░░░ |
+| 1 | Allan Alves Talhari | 4 | 57.1% ███████████░░░░░░░░░ |
 | 2 | Gabriel Giovanini | 3 | 42.9% ████████░░░░░░░░░░░░ |
 
 **Total de commits considerados:** 7
