@@ -1,21 +1,5 @@
 # EquipControl
 
-<!-- PAM-CI-NOTA-INICIO -->
-### Nota atual (automática) — TechControl (equipamentos)
-
-[![CI](https://github.com/gabriel-giovanini/equipcontrol/actions/workflows/pam-ci.yml/badge.svg)](https://github.com/gabriel-giovanini/equipcontrol/actions/workflows/pam-ci.yml) [![Nota](https://img.shields.io/badge/Nota%20PAM%20I-B-yellow)](https://github.com/gabriel-giovanini/equipcontrol/actions/workflows/pam-ci.yml)
-
-**B** — Bom · **56%** (31/55 pontos) · atualizado em 2026-10-26 23:27
-
-| Fase | Pontos |
-|------|--------|
-| Fase 1 — Estrutura | 10/10 |
-| Fase 2 — AsyncStorage | 13/15 |
-| Fase 3 — SQLite | 8/30 |
-
-Checklist item a item em [NOTA.md](NOTA.md) · [ver a rodada mais recente no Actions](https://github.com/gabriel-giovanini/equipcontrol/actions/workflows/pam-ci.yml)
-<!-- PAM-CI-NOTA-FIM -->
-
 TechControl — Projeto PAM I
 
 ---
@@ -32,29 +16,6 @@ TechControl — Projeto PAM I
 ## Tema
 
 Controle de equipamentos — cadastro, empréstimos, devoluções, manutenções e painel de informações.
-
-## Como rodar o projeto
-
-Projeto criado com [`create-expo-app`](https://www.npmjs.com/package/create-expo-app) (Expo / React Native).
-
-> [!NOTE]
-> A pasta `node_modules` foi removida para envio. Veja o [`INSTRUCOES.txt`](./INSTRUCOES.txt) para o passo a passo detalhado.
-
-1. Instale as dependências
-
-   ```bash
-   npm install
-   ```
-
-2. Inicie o app
-
-   ```bash
-   npm start
-   ```
-
-3. Abra no seu dispositivo ou emulador:
-   - **Expo Go**: escaneie o QR Code exibido no terminal
-   - **Web**: pressione `w` no terminal
 
 ## Fichas de Entrega
 
@@ -85,17 +46,3 @@ Projeto criado com [`create-expo-app`](https://www.npmjs.com/package/create-expo
 
 > [!TIP]
 > Material completo do curso: [PAM I](https://etec-bento-quirino.github.io/Programacao-Aplicativos-Moveis-I/)
-
-
----
-
-## Colaboração por integrante
-
-> *Excluídos: commits do professor Jackson Sá (wendelmax), `github-actions[bot]` e `dependabot[bot]`. Contagem com base em `git log --no-merges`.*
-
-| # | Integrante | Commits | Participação |
-|---|------------|---------|--------------|
-| 1 | Allan1605 | 4 | 57.1% ███████████░░░░░░░░░ |
-| 2 | Gabriel Giovanini | 3 | 42.9% ████████░░░░░░░░░░░░ |
-
-**Total de commits considerados:** 7
