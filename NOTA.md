@@ -6,7 +6,7 @@
 
 ![](https://img.shields.io/static/v1?label=Nota%20PAM%20I&message=B&color=yellow)
 
-**Nota atual: B** · 56% (31/55 pontos) · rodada de 2026-10-26 23:27:42 · commit `2043137`
+**Nota atual: B** · 60% (33/55 pontos) · rodada de 2026-11-03 01:25:17 · commit `b500796`
 
 Legenda: I = Insuficiente (0–25%) · R = Regular (25–50%) · B = Bom (50–75%) · MB = Muito bom (75–100%)
 
@@ -14,7 +14,7 @@ Legenda: I = Insuficiente (0–25%) · R = Regular (25–50%) · B = Bom (50–7
 |---|---|---|
 | Fase 1 — Estrutura | 10/10 | completa |
 | Fase 2 — AsyncStorage | 13/15 | em desenvolvimento |
-| Fase 3 — SQLite | 8/30 | iniciando |
+| Fase 3 — SQLite | 10/30 | iniciando |
 
 ## Checklist validado
 
@@ -37,7 +37,7 @@ Legenda: I = Insuficiente (0–25%) · R = Regular (25–50%) · B = Bom (50–7
 - [x] **(+1 pts)** Existe import do AsyncStorage no código — `src/screens/EquipmentDetailScreen.js`
 - [x] **(+1 pts)** Storage faz leitura com AsyncStorage.getItem — `src/screens/EquipmentDetailScreen.js`
 - [x] **(+1 pts)** Storage grava com AsyncStorage.setItem — `src/screens/EquipmentDetailScreen.js`
-- [x] **(+1 pts)** Existe função de CARREGAR a lista (carregar/load) — `index.js`
+- [x] **(+1 pts)** Existe função de CARREGAR a lista (carregar/load) — `App.js`
 - [ ] **(+1 pts)** Existe função de ADICIONAR/CADASTRAR — `—`
 - [x] **(+1 pts)** Existe busca por id (buscar/find/getItem) — `src/screens/EquipmentDetailScreen.js`
 - [x] **(+1 pts)** Existe função de EXCLUIR/remover — `src/screens/EquipmentListScreen.js`
@@ -49,9 +49,9 @@ Legenda: I = Insuficiente (0–25%) · R = Regular (25–50%) · B = Bom (50–7
 - [x] **(+1 pts)** Dados iniciais/seed são gravados na 1ª execução — `src/screens/EquipmentDetailScreen.js`
 - [x] **(+1 pts)** Formulário valida campos (trim/length/vazio) — `src/screens/EquipmentFormScreen.js`
 
-### Fase 3 — Banco de dados SQLite (8/30 pts)
+### Fase 3 — Banco de dados SQLite (10/30 pts)
 
-- [ ] **(+2x2 pts)** Dependência expo-sqlite está no package.json — `FALTA instalar: npx expo install expo-sqlite`
+- [x] **(+2x2 pts)** Dependência expo-sqlite está no package.json — `no package.json`
 - [ ] **(+2x2 pts)** Existe import do expo-sqlite — `—`
 - [ ] **(+2x2 pts)** Existe arquivo de banco de dados — `—`
 - [ ] **(+2x2 pts)** Cria a tabela com CREATE TABLE IF NOT EXISTS — `—`
