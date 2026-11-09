@@ -1,5 +1,5 @@
 # EquipControl
-
+ 
 <!-- PAM-CI-NOTA-INICIO -->
 ### Nota atual (automática) — TechControl (equipamentos)
 
