@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,55 +11,51 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import {
+  getEquipmentById,
+  updateEquipmentStatus,
+  deleteEquipment,
+} from '../database/database';
 
-// ─── Design Tokens (UI/UX Pro Max: Indigo Premium) ─────────────────
 const COLORS = {
-  // Surfaces
-  bgDeep:       '#0B1120',
-  bgBody:       '#F8FAFC',
-  bgCard:       '#FFFFFF',
-
-  // Primary palette — Indigo
-  primary:      '#6366F1',
-  primaryBg:    'rgba(99, 102, 241, 0.10)',
-
-  // Semantic
-  success:      '#10B981',
-  successBg:    'rgba(16, 185, 129, 0.10)',
-  warning:      '#F59E0B',
-  warningBg:    'rgba(245, 158, 11, 0.10)',
-
-  // Text
-  textWhite:    '#FFFFFF',
-  textPrimary:  '#0F172A',
-  textSecondary:'#64748B',
-  textMuted:    '#94A3B8',
-
-  border:       '#E8ECF4',
-  glassBg:      'rgba(255, 255, 255, 0.08)',
+  headerBg: '#1E293B',
+  bodyBg: '#F1F5F9',
+  cardBg: '#FFFFFF',
+  primary: '#4F46E5',
+  primaryBg: '#EEF2FF',
+  success: '#16A34A',
+  successBg: '#DCFCE7',
+  warning: '#D97706',
+  warningBg: '#FEF3C7',
+  error: '#DC2626',
+  errorBg: '#FEE2E2',
+  textWhite: '#FFFFFF',
+  textPrimary: '#1E293B',
+  textSecondary: '#64748B',
+  border: '#E2E8F0',
 };
 
-const SPACING = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
-  xxxl: 32,
-};
+function getTodayFormatted() {
+  const today = new Date();
+  const dd = String(today.getDate()).padStart(2, '0');
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const yyyy = today.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
 
-const RADIUS = {
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
-  pill: 100,
-};
-
-const ASYNC_STORAGE_KEY = '@equipments_v1';
+function showMessage(title, message, onConfirm) {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    window.alert(`${title}\n\n${message}`);
+    if (onConfirm) onConfirm();
+    return;
+  }
+  Alert.alert(
+    title,
+    message,
+    onConfirm ? [{ text: 'OK', onPress: onConfirm }] : [{ text: 'OK' }]
+  );
+}
 
 export default function EquipmentDetailScreen({ route, navigation }) {
   const insets = useSafeAreaInsets();
@@ -67,92 +63,150 @@ export default function EquipmentDetailScreen({ route, navigation }) {
   const [equipment, setEquipment] = useState(initialEquipment);
   const [isUpdating, setIsUpdating] = useState(false);
 
+  useFocusEffect(
+    useCallback(() => {
+      let isMounted = true;
+      async function refreshEquipment() {
+        try {
+          if (initialEquipment?.id) {
+            const freshData = await getEquipmentById(initialEquipment.id);
+            if (!isMounted) return;
+            if (freshData) {
+              setEquipment(freshData);
+            } else {
+              navigation.goBack();
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao buscar equipamento:', error);
+        }
+      }
+      refreshEquipment();
+      return () => {
+        isMounted = false;
+      };
+    }, [initialEquipment?.id, navigation])
+  );
+
   const isAvailable = equipment.status === 'Disponível';
 
   const handleToggleStatus = async () => {
     setIsUpdating(true);
     const newStatus = isAvailable ? 'Em uso' : 'Disponível';
     const isNowInUse = newStatus === 'Em uso';
-    const today = new Date().toLocaleDateString('pt-BR');
+    const today = getTodayFormatted();
 
-    const updatedEquipment = {
-      ...equipment,
-      status: newStatus,
-      dataEmprestimo: isNowInUse ? (equipment.dataEmprestimo || today) : null,
-      dataDevolucao: isNowInUse ? null : today,
-    };
+    const newDataEmprestimo = isNowInUse ? (equipment.dataEmprestimo || today) : null;
+    const newDataDevolucao = isNowInUse ? null : today;
 
     try {
-      const storedData = await AsyncStorage.getItem(ASYNC_STORAGE_KEY);
-      let list = storedData ? JSON.parse(storedData) : [];
-      const index = list.findIndex((item) => item.id === equipment.id);
-      if (index !== -1) {
-        list[index] = updatedEquipment;
-      } else {
-        list.push(updatedEquipment);
+      const updated = await updateEquipmentStatus(
+        equipment.id,
+        newStatus,
+        newDataEmprestimo,
+        newDataDevolucao
+      );
+      if (updated) {
+        setEquipment(updated);
       }
-      await AsyncStorage.setItem(ASYNC_STORAGE_KEY, JSON.stringify(list));
-      setEquipment(updatedEquipment);
 
-      Alert.alert(
-        'Status Atualizado',
-        `O status do equipamento foi alterado para "${newStatus}".`,
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.goBack(),
-          },
-        ]
+      showMessage(
+        'Status atualizado',
+        `O equipamento agora está "${newStatus}".`,
+        () => navigation.goBack()
       );
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
-      Alert.alert('Erro', 'Não foi possível atualizar o status no armazenamento.');
+      showMessage('Erro', error.message || 'Não foi possível atualizar o status.');
     } finally {
       setIsUpdating(false);
     }
+  };
+
+  const handleEditEquipment = () => {
+    navigation.navigate('EquipmentForm', { equipment });
+  };
+
+  const confirmAndDelete = async () => {
+    setIsUpdating(true);
+    try {
+      await deleteEquipment(equipment.id);
+      showMessage(
+        'Excluído',
+        'Equipamento excluído com sucesso.',
+        () => navigation.goBack()
+      );
+    } catch (error) {
+      console.error('Erro ao excluir equipamento:', error);
+      showMessage('Erro', error.message || 'Não foi possível excluir o equipamento.');
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDeleteEquipment = () => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const confirmed = window.confirm(
+        `Deseja realmente excluir "${equipment.nome}"?`
+      );
+      if (confirmed) {
+        confirmAndDelete();
+      }
+      return;
+    }
+
+    Alert.alert(
+      'Excluir equipamento',
+      `Deseja realmente excluir "${equipment.nome}"?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: confirmAndDelete,
+        },
+      ]
+    );
   };
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar style="light" />
 
-      {/* ── Header ── */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
-          activeOpacity={0.7}
-          accessibilityRole="button"
-          accessibilityLabel="Voltar"
         >
           <Ionicons name="arrow-back" size={22} color={COLORS.textWhite} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Detalhes do Equipamento</Text>
-        <View style={styles.headerSpacer} />
+        <View style={{ width: 36 }} />
       </View>
 
-      {/* ── Body ── */}
       <ScrollView
         style={styles.body}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Main Card */}
-        <View style={styles.mainCard}>
-          {/* Header Section */}
-          <View style={styles.cardHeader}>
-            <View style={[styles.iconHero, isAvailable ? styles.iconAvailable : styles.iconBorrowed]}>
-              <Ionicons
-                name={getCategoryIcon(equipment.categoria)}
-                size={40}
-                color={isAvailable ? COLORS.success : COLORS.warning}
-              />
-            </View>
+        <View style={styles.card}>
+          <View style={styles.cardTop}>
             <Text style={styles.equipmentName}>{equipment.nome}</Text>
-            
-            <View style={[styles.statusPill, isAvailable ? styles.pillAvailable : styles.pillBorrowed]}>
-              <View style={[styles.statusDot, isAvailable ? styles.dotAvailable : styles.dotBorrowed]} />
-              <Text style={[styles.statusText, isAvailable ? styles.textAvailable : styles.textBorrowed]}>
+            <View
+              style={[
+                styles.statusBadge,
+                {
+                  backgroundColor: isAvailable
+                    ? COLORS.successBg
+                    : COLORS.warningBg,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.statusText,
+                  { color: isAvailable ? COLORS.success : COLORS.warning },
+                ]}
+              >
                 {equipment.status}
               </Text>
             </View>
@@ -160,83 +214,72 @@ export default function EquipmentDetailScreen({ route, navigation }) {
 
           <View style={styles.divider} />
 
-          {/* Details Section */}
-          <View style={styles.detailsList}>
-            <DetailItem
-              icon="person"
-              label="Responsável Atual"
-              value={equipment.responsavel || 'Sem responsável'}
-            />
-            <DetailItem
-              icon="grid"
-              label="Categoria"
-              value={equipment.categoria || 'Geral'}
-            />
-            <DetailItem
-              icon="calendar"
-              label="Data de Cadastro"
-              value={equipment.dataCadastro || '—'}
-            />
-            <DetailItem
-              icon="arrow-redo"
-              label="Data de Retirada"
-              value={equipment.dataEmprestimo || '—'}
-            />
-            <DetailItem
-              icon="time"
-              label="Devolução Prevista"
-              value={equipment.dataDevolucao || '—'}
-              isLast
-            />
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Categoria</Text>
+            <Text style={styles.infoValue}>{equipment.categoria || 'Geral'}</Text>
           </View>
 
-          <View style={styles.divider} />
-
-          {/* Action Section (Marcar / Desmarcar Status) */}
-          <View style={styles.actionSection}>
-            <Text style={styles.actionTitle}>Alterar Estado do Registro</Text>
-            <Text style={styles.actionDescription}>
-              {isAvailable
-                ? 'Equipamento disponível no inventário. Clique para marcar como em uso.'
-                : 'Equipamento em uso no momento. Clique para registrar devolução.'}
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Responsável</Text>
+            <Text style={styles.infoValue}>
+              {equipment.responsavel || 'Não atribuído'}
             </Text>
+          </View>
 
-            <TouchableOpacity
-              style={[
-                styles.statusActionButton,
-                isAvailable ? styles.btnMarkInUse : styles.btnMarkAvailable,
-                isUpdating && styles.buttonDisabled,
-              ]}
-              onPress={handleToggleStatus}
-              activeOpacity={0.85}
-              disabled={isUpdating}
-            >
-              <Ionicons
-                name={isAvailable ? 'arrow-redo-outline' : 'checkmark-circle-outline'}
-                size={20}
-                color={COLORS.textWhite}
-              />
-              <Text style={styles.statusActionButtonText}>
-                {isUpdating
-                  ? 'Salvando...'
-                  : isAvailable
-                  ? 'Marcar como Em Uso'
-                  : 'Marcar como Disponível'}
-              </Text>
-            </TouchableOpacity>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Data de cadastro</Text>
+            <Text style={styles.infoValue}>{equipment.dataCadastro || '-'}</Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Data de retirada</Text>
+            <Text style={styles.infoValue}>{equipment.dataEmprestimo || '-'}</Text>
+          </View>
+
+          <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
+            <Text style={styles.infoLabel}>Data de devolução</Text>
+            <Text style={styles.infoValue}>{equipment.dataDevolucao || '-'}</Text>
           </View>
         </View>
 
-        {/* Action Info Card */}
-        <View style={styles.infoCard}>
-          <View style={styles.infoIconWrap}>
-            <Ionicons name="cloud-done-outline" size={20} color={COLORS.primary} />
-          </View>
-          <View style={styles.infoContent}>
-            <Text style={styles.infoTitle}>Persistência com AsyncStorage</Text>
-            <Text style={styles.infoText}>
-              O status e datas são sincronizados no armazenamento local imediatamente e recarregados na listagem.
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity
+            style={[
+              styles.statusButton,
+              { backgroundColor: isAvailable ? COLORS.warning : COLORS.success },
+              isUpdating && styles.disabledButton,
+            ]}
+            onPress={handleToggleStatus}
+            disabled={isUpdating}
+          >
+            <Ionicons
+              name={isAvailable ? 'swap-horizontal-outline' : 'checkmark-circle-outline'}
+              size={20}
+              color={COLORS.textWhite}
+            />
+            <Text style={styles.statusButtonText}>
+              {isAvailable ? 'Marcar como Em uso' : 'Registrar devolução'}
             </Text>
+          </TouchableOpacity>
+
+          <View style={styles.rowButtons}>
+            <TouchableOpacity
+              style={[styles.editButton, isUpdating && styles.disabledButton]}
+              onPress={handleEditEquipment}
+              disabled={isUpdating}
+            >
+              <Ionicons name="create-outline" size={18} color={COLORS.primary} />
+              <Text style={styles.editButtonText}>Editar</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.deleteButton, isUpdating && styles.disabledButton]}
+              onPress={handleDeleteEquipment}
+              disabled={isUpdating}
+            >
+              <Ionicons name="trash-outline" size={18} color={COLORS.error} />
+              <Text style={styles.deleteButtonText}>Excluir</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -244,291 +287,143 @@ export default function EquipmentDetailScreen({ route, navigation }) {
   );
 }
 
-// ─── Sub-components ────────────────────────────────────────────────
-function DetailItem({ icon, label, value, isLast }) {
-  return (
-    <View style={[styles.detailItem, !isLast && styles.detailItemBorder]}>
-      <View style={styles.detailIconWrap}>
-        <Ionicons name={icon} size={18} color={COLORS.primary} />
-      </View>
-      <View style={styles.detailTextWrap}>
-        <Text style={styles.detailLabel}>{label}</Text>
-        <Text style={styles.detailValue}>{value}</Text>
-      </View>
-    </View>
-  );
-}
-
-function getCategoryIcon(category) {
-  const icons = {
-    Notebook: 'laptop-outline',
-    Projetor: 'videocam-outline',
-    Tablet: 'tablet-portrait-outline',
-    Monitor: 'desktop-outline',
-    Câmera: 'camera-outline',
-  };
-  return icons[category] || 'hardware-chip-outline';
-}
-
-// ─── Styles ────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.bgDeep,
+    backgroundColor: COLORS.headerBg,
   },
-  
-  // ── Header ──
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.lg,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: COLORS.headerBg,
   },
   backButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: COLORS.glassBg,
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
   },
   headerTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: 'bold',
     color: COLORS.textWhite,
-    letterSpacing: 0.1,
   },
-  headerSpacer: {
-    width: 44,
-  },
-
-  // ── Body ──
   body: {
     flex: 1,
-    backgroundColor: COLORS.bgBody,
-    borderTopLeftRadius: RADIUS.xxl,
-    borderTopRightRadius: RADIUS.xxl,
+    backgroundColor: COLORS.bodyBg,
   },
   scrollContent: {
-    padding: SPACING.xl,
-    paddingBottom: SPACING.xxxl,
+    padding: 16,
   },
-
-  // ── Main Card ──
-  mainCard: {
-    backgroundColor: COLORS.bgCard,
-    borderRadius: RADIUS.xl,
+  card: {
+    backgroundColor: COLORS.cardBg,
+    borderRadius: 10,
+    padding: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#6366F1',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.06,
-        shadowRadius: 16,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
+    marginBottom: 16,
   },
-  cardHeader: {
+  cardTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: SPACING.xxxl,
-  },
-  iconHero: {
-    width: 80,
-    height: 80,
-    borderRadius: RADIUS.xl,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: SPACING.lg,
-  },
-  iconAvailable: {
-    backgroundColor: COLORS.successBg,
-  },
-  iconBorrowed: {
-    backgroundColor: COLORS.warningBg,
+    marginBottom: 12,
+    gap: 10,
   },
   equipmentName: {
-    fontSize: 22,
-    fontWeight: '800',
+    flex: 1,
+    fontSize: 18,
+    fontWeight: 'bold',
     color: COLORS.textPrimary,
-    textAlign: 'center',
-    letterSpacing: -0.5,
-    marginBottom: SPACING.md,
   },
-  statusPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.pill,
-    gap: 6,
-  },
-  pillAvailable: {
-    backgroundColor: COLORS.successBg,
-  },
-  pillBorrowed: {
-    backgroundColor: COLORS.warningBg,
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  dotAvailable: {
-    backgroundColor: COLORS.success,
-  },
-  dotBorrowed: {
-    backgroundColor: COLORS.warning,
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
   },
   statusText: {
     fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    fontWeight: 'bold',
   },
-  textAvailable: {
-    color: COLORS.success,
-  },
-  textBorrowed: {
-    color: COLORS.warning,
-  },
-
   divider: {
     height: 1,
     backgroundColor: COLORS.border,
+    marginBottom: 8,
   },
-
-  // ── Details List ──
-  detailsList: {
-    padding: SPACING.xxl,
-  },
-  detailItem: {
+  infoRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: SPACING.md,
-  },
-  detailItemBorder: {
+    justifyContent: 'space-between',
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  detailIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: RADIUS.md,
-    backgroundColor: COLORS.primaryBg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: SPACING.lg,
-  },
-  detailTextWrap: {
-    flex: 1,
-  },
-  detailLabel: {
-    fontSize: 11,
-    color: COLORS.textSecondary,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-    marginBottom: 4,
-  },
-  detailValue: {
-    fontSize: 16,
-    color: COLORS.textPrimary,
-    fontWeight: '700',
-  },
-
-  // ── Action Section ──
-  actionSection: {
-    padding: SPACING.xxl,
-    backgroundColor: '#F8FAFC',
-  },
-  actionTitle: {
+  infoLabel: {
     fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
-    letterSpacing: -0.2,
-    marginBottom: 4,
-  },
-  actionDescription: {
-    fontSize: 12,
     color: COLORS.textSecondary,
-    lineHeight: 18,
-    marginBottom: SPACING.lg,
   },
-  statusActionButton: {
+  infoValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  actionsContainer: {
+    gap: 10,
+  },
+  statusButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: SPACING.lg,
-    paddingHorizontal: SPACING.xl,
-    borderRadius: RADIUS.lg,
-    gap: SPACING.sm,
-    ...Platform.select({
-      ios: {
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 10,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
+    paddingVertical: 14,
+    borderRadius: 8,
+    gap: 8,
   },
-  btnMarkInUse: {
-    backgroundColor: COLORS.warning,
-    ...Platform.select({
-      ios: { shadowColor: '#F59E0B' },
-    }),
-  },
-  btnMarkAvailable: {
-    backgroundColor: COLORS.success,
-    ...Platform.select({
-      ios: { shadowColor: '#10B981' },
-    }),
-  },
-  statusActionButtonText: {
+  statusButtonText: {
     color: COLORS.textWhite,
     fontSize: 15,
-    fontWeight: '700',
-    letterSpacing: 0.2,
+    fontWeight: 'bold',
   },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-
-  // ── Info Card ──
-  infoCard: {
+  rowButtons: {
     flexDirection: 'row',
-    backgroundColor: COLORS.primaryBg,
-    borderRadius: RADIUS.lg,
-    padding: SPACING.lg,
-    marginTop: SPACING.xl,
-    borderWidth: 1,
-    borderColor: 'rgba(99, 102, 241, 0.18)',
+    gap: 10,
   },
-  infoIconWrap: {
-    marginRight: SPACING.md,
-    marginTop: 2,
-  },
-  infoContent: {
+  editButton: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: COLORS.cardBg,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    gap: 6,
   },
-  infoTitle: {
-    fontSize: 14,
-    fontWeight: '700',
+  editButtonText: {
     color: COLORS.primary,
-    marginBottom: 4,
+    fontSize: 14,
+    fontWeight: 'bold',
   },
-  infoText: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
-    lineHeight: 20,
-    fontWeight: '500',
+  deleteButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: COLORS.cardBg,
+    borderWidth: 1,
+    borderColor: COLORS.error,
+    gap: 6,
+  },
+  deleteButtonText: {
+    color: COLORS.error,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
 });
