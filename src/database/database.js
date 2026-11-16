@@ -144,7 +144,8 @@ export async function getDatabase() {
               status TEXT NOT NULL,
               dataCadastro TEXT,
               dataEmprestimo TEXT,
-              dataDevolucao TEXT
+              dataDevolucao TEXT,
+              foto TEXT
             );
           `);
           return db;
@@ -187,6 +188,7 @@ export async function insertEquipment({
   dataCadastro,
   dataEmprestimo = null,
   dataDevolucao = null,
+  foto = null,
 }) {
   if (!nome || !nome.trim()) {
     throw new Error('O nome do equipamento é obrigatório.');
@@ -198,10 +200,11 @@ export async function insertEquipment({
     const cleanCategoria = (categoria || 'Outros').trim();
     const cleanResponsavel = (responsavel || 'Não atribuído').trim();
     const cleanStatus = status || 'Disponível';
+    const cleanFoto = foto || null;
 
     const result = await db.runAsync(
-      `INSERT INTO equipments (nome, categoria, responsavel, status, dataCadastro, dataEmprestimo, dataDevolucao)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO equipments (nome, categoria, responsavel, status, dataCadastro, dataEmprestimo, dataDevolucao, foto)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         cleanNome,
         cleanCategoria,
@@ -210,6 +213,7 @@ export async function insertEquipment({
         dataCadastro,
         dataEmprestimo,
         dataDevolucao,
+        cleanFoto,
       ]
     );
 
@@ -222,6 +226,7 @@ export async function insertEquipment({
       dataCadastro,
       dataEmprestimo,
       dataDevolucao,
+      foto: cleanFoto,
     };
   } catch (error) {
     console.error('Erro ao inserir equipamento:', error);
@@ -306,6 +311,7 @@ export async function updateEquipment(
     dataCadastro,
     dataEmprestimo = null,
     dataDevolucao = null,
+    foto = null,
   }
 ) {
   const numericId = Number(id);
@@ -320,7 +326,7 @@ export async function updateEquipment(
     const db = await getDatabase();
     const result = await db.runAsync(
       `UPDATE equipments
-       SET nome = ?, categoria = ?, responsavel = ?, status = ?, dataCadastro = ?, dataEmprestimo = ?, dataDevolucao = ?
+       SET nome = ?, categoria = ?, responsavel = ?, status = ?, dataCadastro = ?, dataEmprestimo = ?, dataDevolucao = ?, foto = COALESCE(?, foto)
        WHERE id = ?`,
       [
         nome.trim(),
@@ -330,6 +336,7 @@ export async function updateEquipment(
         dataCadastro,
         dataEmprestimo,
         dataDevolucao,
+        foto,
         numericId,
       ]
     );

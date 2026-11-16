@@ -216,6 +216,8 @@ export default function EquipmentListScreen({ navigation }) {
         style={styles.fab}
         onPress={() => navigation.navigate('EquipmentForm')}
         activeOpacity={0.8}
+        accessibilityRole="button"
+        accessibilityLabel="Cadastrar novo equipamento"
       >
         <Ionicons name="add" size={28} color={COLORS.textWhite} />
       </TouchableOpacity>

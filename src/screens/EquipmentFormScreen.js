@@ -9,9 +9,11 @@ import {
   Alert,
   Platform,
   KeyboardAvoidingView,
+  Image,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { insertEquipment, updateEquipment } from '../database/database';
 
@@ -101,8 +103,36 @@ export default function EquipmentFormScreen({ route, navigation }) {
   const [dataDevolucao, setDataDevolucao] = useState(
     editingEquipment?.dataDevolucao || ''
   );
+  const [fotoUri, setFotoUri] = useState(editingEquipment?.foto || null);
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
+
+  const handlePickImage = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permissionResult.granted) {
+        showMessage(
+          'Permissão necessária',
+          'É necessário conceder permissão de acesso à galeria de fotos para anexar a imagem do equipamento.'
+        );
+        return;
+      }
+
+      const pickerResult = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.7,
+      });
+
+      if (!pickerResult.canceled && pickerResult.assets?.length > 0) {
+        setFotoUri(pickerResult.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Erro ao selecionar foto:', error);
+      showMessage('Erro', 'Não foi possível selecionar a imagem do equipamento.');
+    }
+  };
 
   useEffect(() => {
     if (editingEquipment) {
@@ -201,6 +231,7 @@ export default function EquipmentFormScreen({ route, navigation }) {
       responsavel: responsavel.trim() || 'Não atribuído',
       dataCadastro: dataCadastro.trim() || today,
       status: isEditing ? status : 'Disponível',
+      foto: fotoUri || null,
       dataEmprestimo: isEditing
         ? isEmUso
           ? dataEmprestimo.trim() || today
@@ -430,6 +461,40 @@ export default function EquipmentFormScreen({ route, navigation }) {
               </>
             )}
 
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Foto do Equipamento (Recurso Nativo)</Text>
+              <TouchableOpacity
+                style={styles.imagePickerButton}
+                onPress={handlePickImage}
+                activeOpacity={0.8}
+              >
+                {fotoUri ? (
+                  <View style={styles.imagePreviewContainer}>
+                    <Image source={{ uri: fotoUri }} style={styles.imagePreview} />
+                    <View style={styles.changeImageBadge}>
+                      <Ionicons name="camera" size={14} color={COLORS.textWhite} />
+                      <Text style={styles.changeImageText}>Alterar foto</Text>
+                    </View>
+                  </View>
+                ) : (
+                  <View style={styles.pickImagePlaceholder}>
+                    <Ionicons name="camera-outline" size={32} color={COLORS.primary} />
+                    <Text style={styles.pickImageText}>Tirar ou escolher foto da galeria</Text>
+                    <Text style={styles.pickImageSubtext}>(Recurso nativo expo-image-picker)</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              {fotoUri ? (
+                <TouchableOpacity
+                  style={styles.removeImageButton}
+                  onPress={() => setFotoUri(null)}
+                >
+                  <Ionicons name="trash-outline" size={16} color={COLORS.error} />
+                  <Text style={styles.removeImageText}>Remover foto</Text>
+                </TouchableOpacity>
+              ) : null}
+            </View>
+
             <TouchableOpacity
               style={[styles.saveButton, isSaving && styles.buttonDisabled]}
               onPress={handleSaveEquipment}
@@ -555,5 +620,70 @@ const styles = StyleSheet.create({
     color: COLORS.textWhite,
     fontSize: 15,
     fontWeight: 'bold',
+  },
+  imagePickerButton: {
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    borderStyle: 'dashed',
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#F8FAFC',
+    minHeight: 120,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  pickImagePlaceholder: {
+    alignItems: 'center',
+    padding: 16,
+  },
+  pickImageText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.primary,
+    marginTop: 6,
+  },
+  pickImageSubtext: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
+  imagePreviewContainer: {
+    width: '100%',
+    height: 180,
+    position: 'relative',
+  },
+  imagePreview: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  changeImageBadge: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    backgroundColor: 'rgba(30, 41, 59, 0.85)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 16,
+    gap: 4,
+  },
+  changeImageText: {
+    color: COLORS.textWhite,
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  removeImageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 8,
+    alignSelf: 'flex-start',
+  },
+  removeImageText: {
+    fontSize: 13,
+    color: COLORS.error,
+    fontWeight: '500',
   },
 });

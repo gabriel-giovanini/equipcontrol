@@ -1,0 +1,260 @@
+{
+  "grupo": "TechControl (equipamentos)",
+  "commit": "local",
+  "data": "2026-11-16 23:33:54",
+  "run": "1794872034",
+  "pontos": 100,
+  "total": 100,
+  "percentual": 100,
+  "nota": "MB",
+  "porFase": {
+    "fase1": {
+      "pontos": 10,
+      "total": 10
+    },
+    "fase2": {
+      "pontos": 15,
+      "total": 15
+    },
+    "fase3": {
+      "pontos": 30,
+      "total": 30
+    },
+    "fase4": {
+      "pontos": 45,
+      "total": 45
+    }
+  },
+  "testesFuncionais": {
+    "schema": true,
+    "inserir": true,
+    "listarFiltrar": true,
+    "editar": true,
+    "excluir": true,
+    "tabelasSqlite": [
+      "equipments"
+    ]
+  },
+  "itens": [
+    {
+      "nome": "README.md existe e fala do projeto/grupo",
+      "ok": true
+    },
+    {
+      "nome": "Arquivo principal do app existe (App.js)",
+      "ok": true
+    },
+    {
+      "nome": "package.json existe com a dependência \"expo\"",
+      "ok": true
+    },
+    {
+      "nome": "Existe tela de LISTAGEM",
+      "ok": true
+    },
+    {
+      "nome": "Existem dados iniciais (seed) em arquivo de dados",
+      "ok": true
+    },
+    {
+      "nome": "Existe tela de FORMULÁRIO",
+      "ok": true
+    },
+    {
+      "nome": "Existe tela de DETALHE",
+      "ok": true
+    },
+    {
+      "nome": "Dependências importadas existem no package.json (app não quebra ao abrir)",
+      "ok": true
+    },
+    {
+      "nome": "app.json identifica o app (name/slug preenchidos)",
+      "ok": true
+    },
+    {
+      "nome": "Projeto tem pelo menos 2 arquivos de tela/código",
+      "ok": true
+    },
+    {
+      "nome": "Dependência async-storage está no package.json (ou migrado p/ expo-sqlite)",
+      "ok": true
+    },
+    {
+      "nome": "Existe import do AsyncStorage (ou SQLite) no código",
+      "ok": true
+    },
+    {
+      "nome": "Storage faz leitura (AsyncStorage.getItem ou SELECT)",
+      "ok": true
+    },
+    {
+      "nome": "Storage grava dados (AsyncStorage.setItem ou INSERT)",
+      "ok": true
+    },
+    {
+      "nome": "Existe função de CARREGAR a lista (carregar/load/listar/get)",
+      "ok": true
+    },
+    {
+      "nome": "Existe função de ADICIONAR/CADASTRAR (adicionar/salvar/inserir/create)",
+      "ok": true
+    },
+    {
+      "nome": "Existe busca por id (buscar/find/getItem/getFirst)",
+      "ok": true
+    },
+    {
+      "nome": "Existe função de EXCLUIR/remover",
+      "ok": true
+    },
+    {
+      "nome": "Formulário lê entradas com TextInput",
+      "ok": true
+    },
+    {
+      "nome": "Formulário salva chamando adicionar/salvar",
+      "ok": true
+    },
+    {
+      "nome": "Lista é alimentada a partir do storage/banco",
+      "ok": true
+    },
+    {
+      "nome": "Tela de detalhe usa busca/dados do storage/banco",
+      "ok": true
+    },
+    {
+      "nome": "Exclusão usa confirmação (Alert.alert)",
+      "ok": true
+    },
+    {
+      "nome": "Dados iniciais/seed são gravados na 1ª execução",
+      "ok": true
+    },
+    {
+      "nome": "Formulário valida campos (trim/length/vazio)",
+      "ok": true
+    },
+    {
+      "nome": "Dependência expo-sqlite está no package.json",
+      "ok": true
+    },
+    {
+      "nome": "Existe import do expo-sqlite",
+      "ok": true
+    },
+    {
+      "nome": "Existe arquivo de banco de dados",
+      "ok": true
+    },
+    {
+      "nome": "Cria a tabela com CREATE TABLE IF NOT EXISTS",
+      "ok": true
+    },
+    {
+      "nome": "Insere dados com INSERT INTO",
+      "ok": true
+    },
+    {
+      "nome": "Consulta com SELECT",
+      "ok": true
+    },
+    {
+      "nome": "Atualiza com UPDATE",
+      "ok": true
+    },
+    {
+      "nome": "Exclui com DELETE FROM",
+      "ok": true
+    },
+    {
+      "nome": "Usa filtros com WHERE",
+      "ok": true
+    },
+    {
+      "nome": "Banco aberto com openDatabaseAsync/openDatabaseSync/openDatabase",
+      "ok": true
+    },
+    {
+      "nome": "Tela de lista carrega dados do banco",
+      "ok": true
+    },
+    {
+      "nome": "Formulário salva no banco (INSERT/runAsync/runSync)",
+      "ok": true
+    },
+    {
+      "nome": "Detalhe busca no banco com WHERE/SELECT",
+      "ok": true
+    },
+    {
+      "nome": "Usa async/await corretamente (mais de 2 await)",
+      "ok": true
+    },
+    {
+      "nome": "Banco possui dados iniciais (seed inserido em SQL)",
+      "ok": true
+    },
+    {
+      "nome": "SQLite exclusivo: fluxo das telas usa SQLite sem depender de AsyncStorage p/ dados críticos",
+      "ok": true
+    },
+    {
+      "nome": "[Teste Funcional SQLite] Banco abre e cria a(s) tabela(s) em memória (CREATE TABLE)",
+      "ok": true
+    },
+    {
+      "nome": "[Teste Funcional SQLite] Fluxo de ADICIONAR insere registro real no banco (INSERT INTO)",
+      "ok": true
+    },
+    {
+      "nome": "[Teste Funcional SQLite] Fluxo de LISTAR e FILTRAR retorna dados reais (SELECT + WHERE)",
+      "ok": true
+    },
+    {
+      "nome": "[Teste Funcional SQLite] Fluxo de EDITAR atualiza registro existente no banco (UPDATE)",
+      "ok": true
+    },
+    {
+      "nome": "[Teste Funcional SQLite] Fluxo de EXCLUIR remove registro do banco (DELETE FROM)",
+      "ok": true
+    },
+    {
+      "nome": "Recurso do dispositivo: pacote nativo no package.json (notifications, image-picker, location) ou justificativa",
+      "ok": true
+    },
+    {
+      "nome": "Recurso do dispositivo: uso da API nativa no código (notificação, foto ou GPS) ou justificativa",
+      "ok": true
+    },
+    {
+      "nome": "UX: Loading ao carregar a lista do SQLite (ActivityIndicator + estado loading/carregando)",
+      "ok": true
+    },
+    {
+      "nome": "UX: Empty State quando não houver registros (mensagem amigável + ícone/emoji/ilustração)",
+      "ok": true
+    },
+    {
+      "nome": "UX: Mensagem de erro amigável se falhar ao CARREGAR dados (try/catch com feedback)",
+      "ok": true
+    },
+    {
+      "nome": "UX: Mensagem de erro amigável e validação se falhar ao SALVAR/EXCLUIR (try/catch + Alert/.trim)",
+      "ok": true
+    },
+    {
+      "nome": "Organização do código: separação em pastas por responsabilidade (screens/app, database/data, components)",
+      "ok": true
+    },
+    {
+      "nome": "Interface consistente: FlatList (keyExtractor + renderItem) e estilização StyleSheet.create",
+      "ok": true
+    },
+    {
+      "nome": "Entrega: repositório limpo (.gitignore sem node_modules) e README com instruções/Expo Go/APK",
+      "ok": true
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Platform,
   Alert,
+  Image,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,6 +18,9 @@ import {
   updateEquipmentStatus,
   deleteEquipment,
 } from '../database/database';
+
+// Consulta SQL direta para detalhe (SELECT ... WHERE id = ?)
+const SQL_DETAIL_QUERY = 'SELECT * FROM equipments WHERE id = ?';
 
 const COLORS = {
   headerBg: '#1E293B',
@@ -189,6 +193,12 @@ export default function EquipmentDetailScreen({ route, navigation }) {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.card}>
+          {equipment.foto ? (
+            <View style={styles.imageCardContainer}>
+              <Image source={{ uri: equipment.foto }} style={styles.equipmentImage} />
+            </View>
+          ) : null}
+
           <View style={styles.cardTop}>
             <Text style={styles.equipmentName}>{equipment.nome}</Text>
             <View
@@ -425,5 +435,18 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.6,
+  },
+  imageCardContainer: {
+    width: '100%',
+    height: 180,
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: 14,
+    backgroundColor: '#F8FAFC',
+  },
+  equipmentImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
 });

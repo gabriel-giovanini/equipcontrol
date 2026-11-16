@@ -5,14 +5,13 @@
 
 [![CI](https://github.com/gabriel-giovanini/equipcontrol/actions/workflows/pam-ci.yml/badge.svg)](https://github.com/gabriel-giovanini/equipcontrol/actions/workflows/pam-ci.yml) [![Nota](https://img.shields.io/badge/Nota%20PAM%20I-MB-green)](https://github.com/gabriel-giovanini/equipcontrol/actions/workflows/pam-ci.yml)
 
-**MB** — Muito bom · **91%** (91/100 pontos) · atualizado em 2026-11-16 22:41
+**MB** — Muito bom · **87%** (48/55 pontos) · atualizado em 2026-11-09 22:37
 
 | Fase | Pontos |
 |------|--------|
 | Fase 1 — Estrutura | 10/10 |
-| Fase 2 — AsyncStorage | 15/15 |
-| Fase 3 — SQLite | 30/30 |
-| Fase 4 — Versão Final (UX e Dispositivo) | 36/45 |
+| Fase 2 — AsyncStorage | 10/15 |
+| Fase 3 — SQLite | 28/30 |
 
 Checklist item a item em [NOTA.md](NOTA.md) · [ver a rodada mais recente no Actions](https://github.com/gabriel-giovanini/equipcontrol/actions/workflows/pam-ci.yml)
 <!-- PAM-CI-NOTA-FIM -->
@@ -76,4 +75,59 @@ Controle de equipamentos — cadastro, empréstimos, devoluções, manutenções
 | 2 | Gabriel Giovanini | 3 | 42.9% ████████░░░░░░░░░░░░ |
 
 **Total de commits considerados:** 7
-=======
+
+---
+
+## 🚀 Como Executar e Testar o Projeto (Expo Go / APK)
+
+### Pré-requisitos
+- Node.js (versão 18+)
+- Celular com o aplicativo **Expo Go** instalado (Android ou iOS) ou emulador configurado.
+
+### Passo a passo
+1. Clone este repositório:
+   ```bash
+   git clone https://github.com/gabriel-giovanini/equipcontrol.git
+   cd equipcontrol
+   ```
+
+2. Instale as dependências:
+   ```bash
+   npm install
+   ```
+
+3. Inicie o servidor Metro/Expo:
+   ```bash
+   npm start
+   # ou
+   npx expo start
+   ```
+
+4. **Para testar no celular (Expo Go):**
+   - Abra o app **Expo Go** no celular.
+   - Escaneie o QR Code exibido no terminal.
+   - O aplicativo carregará automaticamente com o banco SQLite e persistência nativa.
+
+5. **Para gerar build APK (Standalone Android):**
+   ```bash
+   npm install -g eas-cli
+   eas login
+   eas build -p android --profile preview
+   ```
+
+---
+
+## 📱 Recursos e Arquitetura do Aplicativo (Fase 4 - Versão Final)
+
+- **SQLite Exclusivo (`src/database/database.js`):**
+  - Armazenamento 100% local e offline utilizando `expo-sqlite`.
+  - CRUD completo com consultas parametrizadas: `CREATE TABLE IF NOT EXISTS`, `INSERT INTO`, `SELECT`, `UPDATE` e `DELETE FROM` com filtros `WHERE`.
+  - Carga inicial automática de sementes (seed) na primeira execução.
+- **Recurso Nativo do Dispositivo (`expo-image-picker`):**
+  - Integração com a câmera e galeria do celular para anexar e visualizar a foto real do equipamento.
+- **Boas Práticas de UX/UI:**
+  - `ActivityIndicator` com estado de loading durante operações assíncronas do banco.
+  - Empty states informativos com ícones temáticos para listas vazias.
+  - Tratamento de exceções e erros amigáveis (`try/catch` com `Alert.alert` e validações `.trim()`).
+  - Diálogo de confirmação antes de excluir qualquer registro.
+

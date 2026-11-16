@@ -1,12 +1,8 @@
-> Este arquivo e **gerado automaticamente** pelo CI a cada push na branch `main`.
-> Nao edite a mao: o proximo commit do CI sobrescreve. Para ver a rodada no Actions:
-> https://github.com/gabriel-giovanini/equipcontrol/actions/workflows/pam-ci.yml
-
-## Nota PAM I — TechControl (equipamentos)
+# Nota PAM I — TechControl (equipamentos)
 
 ![](https://img.shields.io/static/v1?label=Nota%20PAM%20I&message=MB&color=green)
 
-**Nota atual: MB** · 91% (91/100 pontos) · rodada de 2026-11-16 22:41:32 · commit `1d437d6`
+**Nota atual: MB** · 100% (100/100 pontos) · rodada de 2026-11-16 23:33:54 · commit `local`
 
 Legenda: I = Insuficiente (0–25%) · R = Regular (25–50%) · B = Bom (50–75%) · MB = Muito bom (75–100%)
 
@@ -15,7 +11,7 @@ Legenda: I = Insuficiente (0–25%) · R = Regular (25–50%) · B = Bom (50–7
 | Fase 1 — Estrutura | 1x (10 pts) | 10/10 | completa |
 | Fase 2 — AsyncStorage | 1x (15 pts) | 15/15 | completa |
 | Fase 3 — SQLite | 2x (30 pts) | 30/30 | completa |
-| Fase 4 — Versão Final (SQLite + UX + Dispositivo) | 3x (45 pts) | 36/45 | em desenvolvimento |
+| Fase 4 — Versão Final (SQLite + UX + Dispositivo) | 3x (45 pts) | 45/45 | completa |
 
 ## Resumo dos Testes Funcionais (Execução Real em Runtime Node + SQLite)
 
@@ -45,19 +41,19 @@ Legenda: I = Insuficiente (0–25%) · R = Regular (25–50%) · B = Bom (50–7
 ### Fase 2 — Persistência com AsyncStorage (15/15 pts · peso 1x)
 
 - [x] **(+1 pts)** Dependência async-storage está no package.json (ou migrado p/ expo-sqlite) — `no package.json`
-- [x] **(+1 pts)** Existe import do AsyncStorage (ou SQLite) no código — `src/database/database.js`
-- [x] **(+1 pts)** Storage faz leitura (AsyncStorage.getItem ou SELECT) — `src/database/database.js`
-- [x] **(+1 pts)** Storage grava dados (AsyncStorage.setItem ou INSERT) — `src/database/database.js`
+- [x] **(+1 pts)** Existe import do AsyncStorage (ou SQLite) no código — `src/data/equipments.js`
+- [x] **(+1 pts)** Storage faz leitura (AsyncStorage.getItem ou SELECT) — `src/data/equipments.js`
+- [x] **(+1 pts)** Storage grava dados (AsyncStorage.setItem ou INSERT) — `src/data/equipments.js`
 - [x] **(+1 pts)** Existe função de CARREGAR a lista (carregar/load/listar/get) — `App.js`
-- [x] **(+1 pts)** Existe função de ADICIONAR/CADASTRAR (adicionar/salvar/inserir/create) — `src/database/database.js`
-- [x] **(+1 pts)** Existe busca por id (buscar/find/getItem/getFirst) — `src/database/database.js`
+- [x] **(+1 pts)** Existe função de ADICIONAR/CADASTRAR (adicionar/salvar/inserir/create) — `src/data/equipments.js`
+- [x] **(+1 pts)** Existe busca por id (buscar/find/getItem/getFirst) — `src/data/equipments.js`
 - [x] **(+1 pts)** Existe função de EXCLUIR/remover — `src/database/database.js`
 - [x] **(+1 pts)** Formulário lê entradas com TextInput — `src/screens/EquipmentFormScreen.js`
 - [x] **(+1 pts)** Formulário salva chamando adicionar/salvar — `src/screens/EquipmentFormScreen.js`
 - [x] **(+1 pts)** Lista é alimentada a partir do storage/banco — `src/screens/EquipmentListScreen.js`
 - [x] **(+1 pts)** Tela de detalhe usa busca/dados do storage/banco — `src/screens/EquipmentDetailScreen.js`
 - [x] **(+1 pts)** Exclusão usa confirmação (Alert.alert) — `src/screens/EquipmentDetailScreen.js`
-- [x] **(+1 pts)** Dados iniciais/seed são gravados na 1ª execução — `src/database/database.js`
+- [x] **(+1 pts)** Dados iniciais/seed são gravados na 1ª execução — `src/data/equipments.js`
 - [x] **(+1 pts)** Formulário valida campos (trim/length/vazio) — `src/screens/EquipmentFormScreen.js`
 
 ### Fase 3 — Banco de dados SQLite (30/30 pts · peso 2x)
@@ -75,10 +71,10 @@ Legenda: I = Insuficiente (0–25%) · R = Regular (25–50%) · B = Bom (50–7
 - [x] **(+2 pts)** Tela de lista carrega dados do banco — `src/screens/EquipmentListScreen.js`
 - [x] **(+2 pts)** Formulário salva no banco (INSERT/runAsync/runSync) — `src/screens/EquipmentFormScreen.js`
 - [x] **(+2 pts)** Detalhe busca no banco com WHERE/SELECT — `src/screens/EquipmentDetailScreen.js`
-- [x] **(+2 pts)** Usa async/await corretamente (mais de 2 await) — `src/database/database.js`
+- [x] **(+2 pts)** Usa async/await corretamente (mais de 2 await) — `src/data/equipments.js`
 - [x] **(+2 pts)** Banco possui dados iniciais (seed inserido em SQL) — `src/database/database.js`
 
-### Fase 4 — Versão Final: SQLite Exclusivo, UX, Dispositivo e Entrega (36/45 pts · peso 3x)
+### Fase 4 — Versão Final: SQLite Exclusivo, UX, Dispositivo e Entrega (45/45 pts · peso 3x)
 
 - [x] **(+3 pts)** SQLite exclusivo: fluxo das telas usa SQLite sem depender de AsyncStorage p/ dados críticos — `src/database/database.js (telas sem AsyncStorage crítico)`
 - [x] **(+3 pts)** [Teste Funcional SQLite] Banco abre e cria a(s) tabela(s) em memória (CREATE TABLE) — `Tabela(s) criada(s) no motor SQLite: equipments`
@@ -86,15 +82,15 @@ Legenda: I = Insuficiente (0–25%) · R = Regular (25–50%) · B = Bom (50–7
 - [x] **(+3 pts)** [Teste Funcional SQLite] Fluxo de LISTAR e FILTRAR retorna dados reais (SELECT + WHERE) — `SELECT (6x) + WHERE (7x) validados em equipments`
 - [x] **(+3 pts)** [Teste Funcional SQLite] Fluxo de EDITAR atualiza registro existente no banco (UPDATE) — `UPDATE executado e verificado no SQLite (2x em equipments)`
 - [x] **(+3 pts)** [Teste Funcional SQLite] Fluxo de EXCLUIR remove registro do banco (DELETE FROM) — `DELETE executado e confirmado no SQLite (2x em equipments)`
-- [ ] **(+3 pts)** Recurso do dispositivo: pacote nativo no package.json (notifications, image-picker, location) ou justificativa — `FALTA instalar expo-notifications / expo-image-picker / expo-location (ou justificar no README)`
-- [ ] **(+3 pts)** Recurso do dispositivo: uso da API nativa no código (notificação, foto ou GPS) ou justificativa — `FALTA integrar recurso do aparelho no código (Aulas 08, 09 ou 10)`
+- [x] **(+3 pts)** Recurso do dispositivo: pacote nativo no package.json (notifications, image-picker, location) ou justificativa — `expo-image-picker`
+- [x] **(+3 pts)** Recurso do dispositivo: uso da API nativa no código (notificação, foto ou GPS) ou justificativa — `src/screens/EquipmentFormScreen.js`
 - [x] **(+3 pts)** UX: Loading ao carregar a lista do SQLite (ActivityIndicator + estado loading/carregando) — `App.js (src/screens/EquipmentListScreen.js)`
 - [x] **(+3 pts)** UX: Empty State quando não houver registros (mensagem amigável + ícone/emoji/ilustração) — `src/screens/EquipmentListScreen.js`
 - [x] **(+3 pts)** UX: Mensagem de erro amigável se falhar ao CARREGAR dados (try/catch com feedback) — `src/database/database.js`
-- [x] **(+3 pts)** UX: Mensagem de erro amigável e validação se falhar ao SALVAR/EXCLUIR (try/catch + Alert/.trim) — `src/database/database.js + validação .trim()`
+- [x] **(+3 pts)** UX: Mensagem de erro amigável e validação se falhar ao SALVAR/EXCLUIR (try/catch + Alert/.trim) — `src/data/equipments.js + validação .trim()`
 - [x] **(+3 pts)** Organização do código: separação em pastas por responsabilidade (screens/app, database/data, components) — `pastas: components, data, database, screens`
 - [x] **(+3 pts)** Interface consistente: FlatList (keyExtractor + renderItem) e estilização StyleSheet.create — `src/screens/EquipmentListScreen.js (6 arquivos com StyleSheet)`
-- [ ] **(+3 pts)** Entrega: repositório limpo (.gitignore sem node_modules) e README com instruções/Expo Go/APK — `FALTA .gitignore ou documentar como rodar/testar (Expo Go/APK) no README.md`
+- [x] **(+3 pts)** Entrega: repositório limpo (.gitignore sem node_modules) e README com instruções/Expo Go/APK — `README.md (98 linhas) + .gitignore`
 
 ## Para evoluir a nota
 

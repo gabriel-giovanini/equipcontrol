@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -17,8 +18,8 @@ const COLORS = {
   warningBg: '#FEF3C7',
   error: '#DC2626',
   errorBg: '#FEE2E2',
-  textPrimary: '#1E293B',
-  textSecondary: '#64748B',
+  textPrimary: '#0F172A',
+  textSecondary: '#475569',
   border: '#E2E8F0',
 };
 
@@ -52,10 +53,16 @@ export default function EquipmentCard({ equipment, onPress }) {
       style={styles.card}
       onPress={onPress}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={`Equipamento ${equipment.nome}, Categoria ${equipment.categoria}, Status ${equipment.status}`}
     >
-      <View style={[styles.iconContainer, { backgroundColor: statusBg }]}>
-        <Ionicons name={iconName} size={22} color={statusColor} />
-      </View>
+      {equipment.foto ? (
+        <Image source={{ uri: equipment.foto }} style={styles.thumbnail} />
+      ) : (
+        <View style={[styles.iconContainer, { backgroundColor: statusBg }]}>
+          <Ionicons name={iconName} size={22} color={statusColor} />
+        </View>
+      )}
 
       <View style={styles.infoContainer}>
         <Text style={styles.name} numberOfLines={1}>
@@ -80,19 +87,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.bgCard,
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 14,
-    marginBottom: 10,
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: COLORS.border,
+    minHeight: 64,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
   },
   iconContainer: {
-    width: 42,
-    height: 42,
-    borderRadius: 8,
+    width: 44,
+    height: 44,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
+  },
+  thumbnail: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    marginRight: 12,
+    resizeMode: 'cover',
+    backgroundColor: '#F1F5F9',
   },
   infoContainer: {
     flex: 1,
@@ -100,13 +121,14 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '700',
     color: COLORS.textPrimary,
     marginBottom: 3,
   },
   subtitle: {
     fontSize: 13,
     color: COLORS.textSecondary,
+    fontWeight: '500',
   },
   statusBadge: {
     paddingHorizontal: 10,
