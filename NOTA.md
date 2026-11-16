@@ -1,12 +1,12 @@
 > Este arquivo e **gerado automaticamente** pelo CI a cada push na branch `main`.
 > Nao edite a mao: o proximo commit do CI sobrescreve. Para ver a rodada no Actions:
-> https://github.com/ORG/REPO/actions/workflows/pam-ci.yml
+> https://github.com/gabriel-giovanini/equipcontrol/actions/workflows/pam-ci.yml
 
 ## Nota PAM I — TechControl (equipamentos)
 
 ![](https://img.shields.io/static/v1?label=Nota%20PAM%20I&message=MB&color=green)
 
-**Nota atual: MB** · 91% (91/100 pontos) · rodada de 2026-11-10 01:28:30 · commit `local`
+**Nota atual: MB** · 91% (91/100 pontos) · rodada de 2026-11-16 22:41:32 · commit `1d437d6`
 
 Legenda: I = Insuficiente (0–25%) · R = Regular (25–50%) · B = Bom (50–75%) · MB = Muito bom (75–100%)
 
