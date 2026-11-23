@@ -92,8 +92,9 @@ function CornerGlow({ color }) {
     >
       <Defs>
         <RadialGradient id={id} cx="50" cy="50" r="50" gradientUnits="userSpaceOnUse">
-          <Stop offset="0" stopColor={color} stopOpacity="0.16" />
-          <Stop offset="0.55" stopColor={color} stopOpacity="0.07" />
+          {/* Bem discreto: só um toque de cor no canto */}
+          <Stop offset="0" stopColor={color} stopOpacity="0.07" />
+          <Stop offset="0.5" stopColor={color} stopOpacity="0.025" />
           <Stop offset="1" stopColor={color} stopOpacity="0" />
         </RadialGradient>
       </Defs>
@@ -140,9 +141,9 @@ const styles = StyleSheet.create({
   },
   glow: {
     position: 'absolute',
-    top: -260,
-    right: -260,
-    width: 720,
-    height: 720,
+    top: -280,
+    right: -280,
+    width: 620,
+    height: 620,
   },
 });
