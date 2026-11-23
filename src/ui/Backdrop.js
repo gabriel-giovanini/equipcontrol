@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Platform, StyleSheet, View } from 'react-native';
+import React, { useRef } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
 import Svg, {
   Defs,
   RadialGradient,
@@ -9,7 +9,7 @@ import Svg, {
   FeTurbulence,
   FeColorMatrix,
 } from 'react-native-svg';
-import { COLORS, NATIVE_DRIVER } from '../theme/theme';
+import { COLORS } from '../theme/theme';
 
 let idCounter = 0;
 function useSvgId(prefix) {
@@ -92,9 +92,9 @@ function CornerGlow({ color }) {
     >
       <Defs>
         <RadialGradient id={id} cx="50" cy="50" r="50" gradientUnits="userSpaceOnUse">
-          {/* Bem discreto: só um toque de cor no canto */}
-          <Stop offset="0" stopColor={color} stopOpacity="0.07" />
-          <Stop offset="0.5" stopColor={color} stopOpacity="0.025" />
+          {/* Luz neutra e suave, igual à referência aprovada */}
+          <Stop offset="0" stopColor={color} stopOpacity="0.15" />
+          <Stop offset="0.5" stopColor={color} stopOpacity="0.06" />
           <Stop offset="1" stopColor={color} stopOpacity="0" />
         </RadialGradient>
       </Defs>
@@ -103,29 +103,17 @@ function CornerGlow({ color }) {
   );
 }
 
-// Fundo #0c0a09 + brilho na cor do item em destaque, com transição de cor
-export default function Backdrop({ glowColor = '#F97316', children, style }) {
-  const [layers, setLayers] = useState({ prev: glowColor, current: glowColor });
-  const fade = useRef(new Animated.Value(1)).current;
+// Brilho neutro (cinza claro) no canto, igual em todas as telas: o dono do
+// projeto preferiu esse tom ao brilho colorido (laranja ficava marrom e forte).
+const NEUTRAL_GLOW = '#E7E5E4';
 
-  useEffect(() => {
-    if (glowColor === layers.current) return;
-    setLayers((l) => ({ prev: l.current, current: glowColor }));
-    fade.setValue(0);
-    Animated.timing(fade, {
-      toValue: 1,
-      duration: 700,
-      useNativeDriver: NATIVE_DRIVER,
-    }).start();
-  }, [glowColor]); // eslint-disable-line react-hooks/exhaustive-deps
-
+// Fundo #0c0a09 + brilho neutro e suave no canto. `glowColor` continua aceito
+// pelas telas, mas não muda mais a cor do brilho.
+export default function Backdrop({ children, style }) {
   return (
     <View style={[styles.root, style]}>
       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-        <CornerGlow color={layers.prev} />
-        <Animated.View style={[StyleSheet.absoluteFill, { opacity: fade }]}>
-          <CornerGlow color={layers.current} />
-        </Animated.View>
+        <CornerGlow color={NEUTRAL_GLOW} />
         <Grain opacity={0.05} />
       </View>
       {children}
@@ -141,9 +129,9 @@ const styles = StyleSheet.create({
   },
   glow: {
     position: 'absolute',
-    top: -280,
-    right: -280,
-    width: 620,
-    height: 620,
+    top: -260,
+    right: -260,
+    width: 720,
+    height: 720,
   },
 });

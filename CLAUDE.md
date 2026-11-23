@@ -21,7 +21,7 @@ O CI lê o código com regex. O que precisa continuar existindo:
 ## Estética: painel escuro premium (estilo Money Sync)
 
 **Cores e superfícies**
-- Fundo `#0c0a09` com brilho radial no canto, na cor do item em destaque. O dono do projeto pediu que ele seja **bem discreto** (pico de opacity ~.07): não deixar o brilho forte de novo.
+- Fundo `#0c0a09` com brilho radial **neutro (cinza claro, #E7E5E4, pico de opacity ~.15)** no canto superior direito, igual em todas as telas. O dono do projeto aprovou esse tom; o brilho colorido (ex.: laranja, que ficava marrom e forte) foi rejeitado — não voltar a colorir o brilho.
 - Painéis `rgba(255,255,255,.035)`, borda `rgba(255,255,255,.08)`, raio 1.5rem (24px).
 - Granulado SVG feTurbulence (opacity .08) sobre os degradês.
 - Nada de gradiente roxo-azul genérico, nada de emojis, nada de ✨.
