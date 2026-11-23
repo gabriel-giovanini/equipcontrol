@@ -4,8 +4,9 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
+  Pressable,
   ActivityIndicator,
+  useWindowDimensions,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,29 +19,59 @@ import {
   getEquipmentsByStatus,
   getEquipmentCounts,
 } from '../database/database';
+import { COLORS, FONTS, RADIUS, TABULAR, WIDE_BREAKPOINT, getPalette, getStatusColor } from '../theme/theme';
+import Backdrop from '../ui/Backdrop';
+import { TopBar } from '../ui/Shell';
+import { Heading, Kicker } from '../ui/Typography';
+import { GlassButton, PrimaryButton } from '../ui/Buttons';
+import FeaturedCard from '../ui/FeaturedCard';
+import FloatingIllustration from '../ui/Illustration';
+import { FadeUp, useCountUp } from '../ui/motion';
 
-const COLORS = {
-  headerBg: '#1E293B',
-  bodyBg: '#F1F5F9',
-  cardBg: '#FFFFFF',
-  primary: '#4F46E5',
-  success: '#16A34A',
-  warning: '#D97706',
-  error: '#DC2626',
-  textWhite: '#FFFFFF',
-  textPrimary: '#1E293B',
-  textSecondary: '#64748B',
-  border: '#E2E8F0',
-};
+function StatPanel({ label, value, dotColor, selected, onPress, compact }) {
+  const display = useCountUp(value);
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      style={{ flex: 1 }}
+    >
+      {({ hovered }) => (
+        <View
+          style={[
+            styles.statCard,
+            compact && styles.statCardCompact,
+            hovered && styles.statCardHover,
+            selected && styles.statCardSelected,
+          ]}
+        >
+          <Text style={[styles.statNumber, compact && styles.statNumberCompact]}>
+            {display}
+          </Text>
+          <View style={[styles.statLabelRow, compact && styles.statLabelRowCompact]}>
+            {dotColor ? <View style={[styles.statDot, { backgroundColor: dotColor }]} /> : null}
+            <Text style={[styles.statLabel, compact && styles.statLabelCompact]}>
+              {label}
+            </Text>
+          </View>
+        </View>
+      )}
+    </Pressable>
+  );
+}
 
 export default function EquipmentListScreen({ navigation }) {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   const [equipments, setEquipments] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState('ALL');
   const [counts, setCounts] = useState({ total: 0, emUso: 0, disponiveis: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
+  // Estado só de apresentação: qual equipamento aparece no card de destaque
+  const [featuredIndex, setFeaturedIndex] = useState(0);
 
   const loadEquipments = useCallback(
     async (showLoading = false) => {
@@ -80,11 +111,18 @@ export default function EquipmentListScreen({ navigation }) {
     loadEquipments(false);
   };
 
+  const isWide = width >= WIDE_BREAKPOINT;
+  const isNarrow = width < 520;
+  const showFeatured = !isLoading && !errorMessage && equipments.length > 0;
+  const safeFeaturedIndex = equipments.length ? featuredIndex % equipments.length : 0;
+  const featured = showFeatured ? equipments[safeFeaturedIndex] : null;
+  const glowColor = getPalette(featured?.categoria || 'Notebook').accent;
+
   const renderEmptyState = () => {
     if (isLoading) {
       return (
         <View style={styles.emptyContainer}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
+          <ActivityIndicator size="large" color={COLORS.white} />
           <Text style={styles.emptySubtitle}>Carregando...</Text>
         </View>
       );
@@ -92,16 +130,17 @@ export default function EquipmentListScreen({ navigation }) {
 
     if (errorMessage) {
       return (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="alert-circle-outline" size={40} color={COLORS.error} />
+        <View style={[styles.emptyContainer, styles.emptyPanel]}>
+          <View style={styles.errorIcon}>
+            <Ionicons name="alert-circle-outline" size={26} color={COLORS.danger} />
+          </View>
           <Text style={styles.emptyTitle}>Erro ao carregar lista</Text>
           <Text style={styles.emptySubtitle}>{errorMessage}</Text>
-          <TouchableOpacity
-            style={styles.emptyButton}
+          <PrimaryButton
+            label="Tentar novamente"
+            icon="refresh"
             onPress={() => loadEquipments(true)}
-          >
-            <Text style={styles.emptyButtonText}>Tentar novamente</Text>
-          </TouchableOpacity>
+          />
         </View>
       );
     }
@@ -109,8 +148,8 @@ export default function EquipmentListScreen({ navigation }) {
     const isAll = selectedFilter === 'ALL';
 
     return (
-      <View style={styles.emptyContainer}>
-        <Ionicons name="folder-open-outline" size={44} color={COLORS.textSecondary} />
+      <View style={[styles.emptyContainer, styles.emptyPanel]}>
+        <FloatingIllustration categoria={isAll ? 'Outros' : 'Notebook'} size={150} />
         <Text style={styles.emptyTitle}>
           {isAll
             ? 'Nenhum equipamento cadastrado'
@@ -118,228 +157,268 @@ export default function EquipmentListScreen({ navigation }) {
         </Text>
         <Text style={styles.emptySubtitle}>
           {isAll
-            ? 'Toque no botão + para cadastrar um equipamento.'
+            ? 'Toque em Novo para cadastrar um equipamento.'
             : 'Não há equipamentos com esse status no momento.'}
         </Text>
 
-        {!isAll && (
-          <TouchableOpacity
-            style={styles.emptyButton}
+        {isAll ? (
+          <PrimaryButton
+            label="Cadastrar equipamento"
+            onPress={() => navigation.navigate('EquipmentForm')}
+          />
+        ) : (
+          <GlassButton
+            label="Mostrar todos"
             onPress={() => setSelectedFilter('ALL')}
-          >
-            <Text style={styles.emptyButtonText}>Mostrar todos</Text>
-          </TouchableOpacity>
+          />
         )}
       </View>
     );
   };
 
-  return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar style="light" />
+  const stats = (
+    <View style={[styles.statsRow, isWide && showFeatured && styles.statsColumn]}>
+      <StatPanel
+        label="Todos"
+        value={counts.total}
+        selected={selectedFilter === 'ALL'}
+        onPress={() => setSelectedFilter('ALL')}
+        compact={isNarrow}
+      />
+      <StatPanel
+        label="Em uso"
+        value={counts.emUso}
+        dotColor={getStatusColor('Em uso')}
+        selected={selectedFilter === 'Em uso'}
+        onPress={() => setSelectedFilter('Em uso')}
+        compact={isNarrow}
+      />
+      <StatPanel
+        label="Disponíveis"
+        value={counts.disponiveis}
+        dotColor={getStatusColor('Disponível')}
+        selected={selectedFilter === 'Disponível'}
+        onPress={() => setSelectedFilter('Disponível')}
+        compact={isNarrow}
+      />
+    </View>
+  );
 
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>EquipControl</Text>
-        <Text style={styles.headerSubtitle}>Controle de Equipamentos</Text>
+  const header = (
+    <View>
+      <FadeUp index={0} style={styles.hero}>
+        <Kicker>Painel interno</Kicker>
+        <Heading line1="Central de" line2="equipamentos." style={{ marginTop: 14 }} />
+      </FadeUp>
 
-        <View style={styles.statsRow}>
-          <TouchableOpacity
-            style={[
-              styles.statCard,
-              selectedFilter === 'ALL' && styles.statCardSelected,
-            ]}
-            onPress={() => setSelectedFilter('ALL')}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.statNumber}>{counts.total}</Text>
-            <Text style={styles.statLabel}>Todos</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.statCard,
-              selectedFilter === 'Em uso' && styles.statCardSelected,
-            ]}
-            onPress={() => setSelectedFilter('Em uso')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.statNumber, { color: '#FBBF24' }]}>
-              {counts.emUso}
-            </Text>
-            <Text style={styles.statLabel}>Em uso</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.statCard,
-              selectedFilter === 'Disponível' && styles.statCardSelected,
-            ]}
-            onPress={() => setSelectedFilter('Disponível')}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.statNumber, { color: '#4ADE80' }]}>
-              {counts.disponiveis}
-            </Text>
-            <Text style={styles.statLabel}>Disponíveis</Text>
-          </TouchableOpacity>
-        </View>
+      <View style={[styles.overview, isWide && styles.overviewWide]}>
+        {showFeatured ? (
+          <FadeUp index={1} style={isWide ? { flex: 1.6 } : null}>
+            <FeaturedCard
+              items={equipments}
+              index={safeFeaturedIndex}
+              onIndexChange={setFeaturedIndex}
+              onOpen={(item) => navigation.navigate('EquipmentDetail', { equipment: item })}
+              compact={!isWide}
+            />
+          </FadeUp>
+        ) : null}
+        <FadeUp index={2} style={isWide ? { flex: 1 } : null}>
+          {stats}
+        </FadeUp>
       </View>
 
-      <View style={styles.body}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>
-            {selectedFilter === 'ALL'
-              ? 'Equipamentos cadastrados'
-              : `Filtro: ${selectedFilter}`}
-          </Text>
-          <Text style={styles.sectionCount}>{equipments.length} item(ns)</Text>
-        </View>
+      <FadeUp index={3} style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>
+          {selectedFilter === 'ALL'
+            ? 'Equipamentos cadastrados'
+            : `Filtro: ${selectedFilter}`}
+        </Text>
+        <Text style={styles.sectionCount}>{equipments.length} item(ns)</Text>
+      </FadeUp>
+    </View>
+  );
 
-        <FlatList
-          data={equipments}
-          keyExtractor={(item) => String(item.id)}
-          refreshing={isRefreshing}
-          onRefresh={handleRefresh}
-          renderItem={({ item }) => (
+  return (
+    <Backdrop glowColor={glowColor} style={{ paddingTop: insets.top }}>
+      <StatusBar style="light" />
+
+      <TopBar
+        title="EquipControl"
+        subtitle="Controle de Equipamentos"
+        right={
+          <PrimaryButton
+            compact
+            label={isNarrow ? 'Novo' : 'Novo equipamento'}
+            onPress={() => navigation.navigate('EquipmentForm')}
+            accessibilityLabel="Cadastrar novo equipamento"
+          />
+        }
+      />
+
+      <FlatList
+        data={equipments}
+        keyExtractor={(item) => String(item.id)}
+        refreshing={isRefreshing}
+        onRefresh={handleRefresh}
+        ListHeaderComponent={header}
+        renderItem={({ item, index }) => (
+          <FadeUp index={Math.min(index, 8)} delay={240}>
             <EquipmentCard
               equipment={item}
               onPress={() => navigation.navigate('EquipmentDetail', { equipment: item })}
             />
-          )}
-          ListEmptyComponent={renderEmptyState}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContent}
-        />
-      </View>
-
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate('EquipmentForm')}
-        activeOpacity={0.8}
-        accessibilityRole="button"
-        accessibilityLabel="Cadastrar novo equipamento"
-      >
-        <Ionicons name="add" size={28} color={COLORS.textWhite} />
-      </TouchableOpacity>
-    </View>
+          </FadeUp>
+        )}
+        ListEmptyComponent={renderEmptyState}
+        showsVerticalScrollIndicator={false}
+        style={styles.list}
+        contentContainerStyle={[styles.listContent, { paddingHorizontal: isNarrow ? 16 : 24 }]}
+      />
+    </Backdrop>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  list: {
     flex: 1,
-    backgroundColor: COLORS.headerBg,
   },
-  header: {
-    backgroundColor: COLORS.headerBg,
-    paddingHorizontal: 20,
-    paddingTop: 14,
-    paddingBottom: 20,
+  listContent: {
+    width: '100%',
+    maxWidth: 1180,
+    alignSelf: 'center',
+    paddingBottom: 48,
   },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: COLORS.textWhite,
+  hero: {
+    paddingTop: 12,
+    paddingBottom: 26,
   },
-  headerSubtitle: {
-    fontSize: 13,
-    color: '#94A3B8',
-    marginTop: 2,
-    marginBottom: 16,
+  overview: {
+    gap: 14,
+    marginBottom: 30,
+  },
+  overviewWide: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
   },
   statsRow: {
     flexDirection: 'row',
     gap: 10,
   },
+  statsColumn: {
+    flexDirection: 'column',
+    flex: 1,
+  },
   statCard: {
     flex: 1,
-    backgroundColor: '#334155',
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'transparent',
+    justifyContent: 'space-between',
+    minHeight: 104,
+    padding: 18,
+    borderRadius: RADIUS.panel,
+    backgroundColor: COLORS.panel,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  statCardCompact: {
+    minHeight: 92,
+    padding: 12,
+    borderRadius: 20,
+  },
+  statCardHover: {
+    backgroundColor: COLORS.panelHover,
   },
   statCardSelected: {
-    borderColor: '#818CF8',
-    backgroundColor: '#3B4254',
+    borderColor: 'rgba(255,255,255,0.55)',
+    backgroundColor: 'rgba(255,255,255,0.07)',
   },
   statNumber: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: COLORS.textWhite,
+    fontFamily: FONTS.display800,
+    fontSize: 38,
+    letterSpacing: -1,
+    color: COLORS.white,
+    ...TABULAR,
+  },
+  statNumberCompact: {
+    fontSize: 28,
+  },
+  statLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 8,
+  },
+  statLabelRowCompact: {
+    gap: 6,
+  },
+  statLabelCompact: {
+    fontSize: 12,
+  },
+  statDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   statLabel: {
-    fontSize: 12,
-    color: '#CBD5E1',
-    marginTop: 4,
-  },
-  body: {
-    flex: 1,
-    backgroundColor: COLORS.bodyBg,
-    paddingTop: 18,
-    paddingHorizontal: 16,
+    fontFamily: FONTS.body500,
+    fontSize: 13,
+    color: COLORS.text70,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+    alignItems: 'baseline',
+    marginBottom: 14,
+    gap: 12,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
+    flex: 1,
+    fontFamily: FONTS.display800,
+    fontSize: 18,
+    letterSpacing: -0.3,
+    color: COLORS.white,
   },
   sectionCount: {
+    fontFamily: FONTS.body500,
     fontSize: 13,
-    color: COLORS.textSecondary,
-  },
-  listContent: {
-    paddingBottom: 90,
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: COLORS.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 4,
+    color: COLORS.text50,
+    ...TABULAR,
   },
   emptyContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 60,
+    paddingVertical: 48,
     paddingHorizontal: 20,
   },
+  emptyPanel: {
+    borderRadius: RADIUS.panel,
+    backgroundColor: COLORS.panel,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  errorIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(248,113,113,0.12)',
+    marginBottom: 6,
+  },
   emptyTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
-    marginTop: 12,
-    marginBottom: 4,
+    fontFamily: FONTS.display800,
+    fontSize: 20,
+    letterSpacing: -0.3,
+    color: COLORS.white,
+    marginTop: 14,
+    marginBottom: 6,
     textAlign: 'center',
   },
   emptySubtitle: {
+    fontFamily: FONTS.body400,
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: COLORS.text50,
     textAlign: 'center',
-    marginBottom: 16,
-  },
-  emptyButton: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  emptyButtonText: {
-    color: COLORS.textWhite,
-    fontSize: 14,
-    fontWeight: '600',
+    marginTop: 8,
+    marginBottom: 22,
   },
 });

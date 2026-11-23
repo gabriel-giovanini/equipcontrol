@@ -1,27 +1,10 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-} from 'react-native';
+import { Animated, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-const COLORS = {
-  bgCard: '#FFFFFF',
-  primary: '#4F46E5',
-  primaryBg: '#EEF2FF',
-  success: '#16A34A',
-  successBg: '#DCFCE7',
-  warning: '#D97706',
-  warningBg: '#FEF3C7',
-  error: '#DC2626',
-  errorBg: '#FEE2E2',
-  textPrimary: '#0F172A',
-  textSecondary: '#475569',
-  border: '#E2E8F0',
-};
+import { COLORS, FONTS, RADIUS, getPalette } from '../theme/theme';
+import StatusDot from '../ui/StatusDot';
+import { usePressScale } from '../ui/motion';
 
 const CATEGORY_ICONS = {
   Notebook: 'laptop-outline',
@@ -33,52 +16,52 @@ const CATEGORY_ICONS = {
 
 export default function EquipmentCard({ equipment, onPress }) {
   const iconName = CATEGORY_ICONS[equipment.categoria] || 'hardware-chip-outline';
-
-  let statusColor = COLORS.primary;
-  let statusBg = COLORS.primaryBg;
-
-  if (equipment.status === 'Disponível') {
-    statusColor = COLORS.success;
-    statusBg = COLORS.successBg;
-  } else if (equipment.status === 'Em uso') {
-    statusColor = COLORS.warning;
-    statusBg = COLORS.warningBg;
-  } else if (equipment.status === 'Quebrado') {
-    statusColor = COLORS.error;
-    statusBg = COLORS.errorBg;
-  }
+  const palette = getPalette(equipment.categoria);
+  const press = usePressScale(0.97);
 
   return (
-    <TouchableOpacity
-      style={styles.card}
+    <Pressable
       onPress={onPress}
-      activeOpacity={0.7}
+      onPressIn={press.onPressIn}
+      onPressOut={press.onPressOut}
       accessibilityRole="button"
       accessibilityLabel={`Equipamento ${equipment.nome}, Categoria ${equipment.categoria}, Status ${equipment.status}`}
     >
-      {equipment.foto ? (
-        <Image source={{ uri: equipment.foto }} style={styles.thumbnail} />
-      ) : (
-        <View style={[styles.iconContainer, { backgroundColor: statusBg }]}>
-          <Ionicons name={iconName} size={22} color={statusColor} />
-        </View>
+      {({ hovered }) => (
+        <Animated.View
+          style={[
+            styles.card,
+            hovered && styles.cardHover,
+            { transform: [{ scale: press.scale }] },
+          ]}
+        >
+          {equipment.foto ? (
+            <Image source={{ uri: equipment.foto }} style={styles.thumbnail} />
+          ) : (
+            <View style={styles.iconContainer}>
+              <Ionicons name={iconName} size={22} color={palette.accent} />
+            </View>
+          )}
+
+          <View style={styles.infoContainer}>
+            <Text style={styles.name} numberOfLines={1}>
+              {equipment.nome}
+            </Text>
+            <Text style={styles.subtitle} numberOfLines={1}>
+              {equipment.categoria} · {equipment.responsavel || 'Sem responsável'}
+            </Text>
+          </View>
+
+          <StatusDot status={equipment.status} style={styles.status} />
+
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color={hovered ? COLORS.white : COLORS.text30}
+          />
+        </Animated.View>
       )}
-
-      <View style={styles.infoContainer}>
-        <Text style={styles.name} numberOfLines={1}>
-          {equipment.nome}
-        </Text>
-        <Text style={styles.subtitle} numberOfLines={1}>
-          {equipment.categoria} • {equipment.responsavel || 'Sem responsável'}
-        </Text>
-      </View>
-
-      <View style={[styles.statusBadge, { backgroundColor: statusBg }]}>
-        <Text style={[styles.statusText, { color: statusColor }]}>
-          {equipment.status}
-        </Text>
-      </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -86,57 +69,54 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 12,
+    backgroundColor: COLORS.panel,
+    borderRadius: RADIUS.panel,
     borderWidth: 1,
     borderColor: COLORS.border,
-    minHeight: 64,
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
+    paddingVertical: 14,
+    paddingLeft: 14,
+    paddingRight: 16,
+    marginBottom: 10,
+    minHeight: 72,
+    gap: 14,
+  },
+  cardHover: {
+    backgroundColor: COLORS.panelHover,
+    borderColor: COLORS.borderStrong,
   },
   iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
+    width: 46,
+    height: 46,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   thumbnail: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    marginRight: 12,
+    width: 46,
+    height: 46,
+    borderRadius: 16,
     resizeMode: 'cover',
-    backgroundColor: '#F1F5F9',
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
   infoContainer: {
     flex: 1,
-    marginRight: 8,
+    minWidth: 0,
   },
   name: {
+    fontFamily: FONTS.display700,
     fontSize: 15,
-    fontWeight: '700',
-    color: COLORS.textPrimary,
+    color: COLORS.white,
     marginBottom: 3,
   },
   subtitle: {
+    fontFamily: FONTS.body400,
     fontSize: 13,
-    color: COLORS.textSecondary,
-    fontWeight: '500',
+    color: COLORS.text50,
   },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 6,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '600',
+  status: {
+    flexShrink: 0,
   },
 });

@@ -5,30 +5,24 @@ import {
   StyleSheet,
   ScrollView,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   Alert,
   Platform,
   KeyboardAvoidingView,
   Image,
+  useWindowDimensions,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { insertEquipment, updateEquipment } from '../database/database';
-
-const COLORS = {
-  headerBg: '#1E293B',
-  bodyBg: '#F1F5F9',
-  cardBg: '#FFFFFF',
-  primary: '#4F46E5',
-  error: '#DC2626',
-  textWhite: '#FFFFFF',
-  textPrimary: '#1E293B',
-  textSecondary: '#64748B',
-  textMuted: '#94A3B8',
-  border: '#CBD5E1',
-};
+import { COLORS, FONTS, RADIUS, TABULAR, getPalette } from '../theme/theme';
+import Backdrop from '../ui/Backdrop';
+import { TopBar } from '../ui/Shell';
+import { FieldLabel, Heading, Kicker } from '../ui/Typography';
+import { GlassButton, PrimaryButton } from '../ui/Buttons';
+import { FadeUp } from '../ui/motion';
 
 const CATEGORIES = [
   'Notebook',
@@ -267,39 +261,44 @@ export default function EquipmentFormScreen({ route, navigation }) {
     }
   };
 
+  const { width } = useWindowDimensions();
+  const isNarrow = width < 520;
+
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <Backdrop glowColor={getPalette(categoria).accent} style={{ paddingTop: insets.top }}>
       <StatusBar style="light" />
 
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={22} color={COLORS.textWhite} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>
-          {isEditing ? 'Editar Equipamento' : 'Novo Equipamento'}
-        </Text>
-        <View style={{ width: 36 }} />
-      </View>
+      <TopBar
+        title={isEditing ? 'Editar Equipamento' : 'Novo Equipamento'}
+        subtitle={isEditing ? editingEquipment.nome : 'Preencha os dados abaixo'}
+        onBack={() => navigation.goBack()}
+      />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
-          style={styles.body}
-          contentContainerStyle={styles.scrollContent}
+          style={{ flex: 1 }}
+          contentContainerStyle={[styles.scrollContent, { paddingHorizontal: isNarrow ? 16 : 24 }]}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.card}>
+          <FadeUp index={0} style={styles.hero}>
+            <Kicker>{isEditing ? 'Edição' : 'Cadastro'}</Kicker>
+            <Heading
+              line1={isEditing ? 'Atualizar' : 'Registrar novo'}
+              line2="equipamento."
+              scale={0.82}
+              style={{ marginTop: 14 }}
+            />
+          </FadeUp>
+
+          <FadeUp index={1} style={styles.card}>
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Nome do equipamento *</Text>
-              <TextInput
-                style={[styles.input, errors.nome && styles.inputError]}
+              <FieldLabel>Nome do equipamento *</FieldLabel>
+              <GlassInput
+                hasError={Boolean(errors.nome)}
                 placeholder="Ex: Notebook Dell"
-                placeholderTextColor={COLORS.textMuted}
                 value={nome}
                 onChangeText={(text) => {
                   setNome(text);
@@ -312,30 +311,19 @@ export default function EquipmentFormScreen({ route, navigation }) {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Categoria *</Text>
+              <FieldLabel>Categoria *</FieldLabel>
               <View style={styles.chipsContainer}>
-                {CATEGORIES.map((cat) => {
-                  const isSelected = categoria === cat;
-                  return (
-                    <TouchableOpacity
-                      key={cat}
-                      style={[styles.chip, isSelected && styles.chipSelected]}
-                      onPress={() => {
-                        setCategoria(cat);
-                        clearFieldError('categoria');
-                      }}
-                    >
-                      <Text
-                        style={[
-                          styles.chipText,
-                          isSelected && styles.chipTextSelected,
-                        ]}
-                      >
-                        {cat}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
+                {CATEGORIES.map((cat) => (
+                  <Choice
+                    key={cat}
+                    label={cat}
+                    selected={categoria === cat}
+                    onPress={() => {
+                      setCategoria(cat);
+                      clearFieldError('categoria');
+                    }}
+                  />
+                ))}
               </View>
               {errors.categoria ? (
                 <Text style={styles.errorText}>{errors.categoria}</Text>
@@ -343,13 +331,12 @@ export default function EquipmentFormScreen({ route, navigation }) {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>
+              <FieldLabel>
                 Responsável {isEditing && status === 'Em uso' ? '*' : '(opcional)'}
-              </Text>
-              <TextInput
-                style={[styles.input, errors.responsavel && styles.inputError]}
+              </FieldLabel>
+              <GlassInput
+                hasError={Boolean(errors.responsavel)}
                 placeholder="Nome do responsável ou setor"
-                placeholderTextColor={COLORS.textMuted}
                 value={responsavel}
                 onChangeText={(text) => {
                   setResponsavel(text);
@@ -362,11 +349,11 @@ export default function EquipmentFormScreen({ route, navigation }) {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Data de cadastro *</Text>
-              <TextInput
-                style={[styles.input, errors.dataCadastro && styles.inputError]}
+              <FieldLabel>Data de cadastro *</FieldLabel>
+              <GlassInput
+                hasError={Boolean(errors.dataCadastro)}
+                numeric
                 placeholder="DD/MM/AAAA"
-                placeholderTextColor={COLORS.textMuted}
                 value={dataCadastro}
                 onChangeText={(text) => {
                   setDataCadastro(formatDateInput(text));
@@ -383,41 +370,27 @@ export default function EquipmentFormScreen({ route, navigation }) {
             {isEditing && (
               <>
                 <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Status</Text>
+                  <FieldLabel>Status</FieldLabel>
                   <View style={styles.chipsContainer}>
-                    {STATUS_OPTIONS.map((opt) => {
-                      const isSelected = status === opt;
-                      return (
-                        <TouchableOpacity
-                          key={opt}
-                          style={[styles.chip, isSelected && styles.chipSelected]}
-                          onPress={() => handleStatusSelect(opt)}
-                        >
-                          <Text
-                            style={[
-                              styles.chipText,
-                              isSelected && styles.chipTextSelected,
-                            ]}
-                          >
-                            {opt}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
+                    {STATUS_OPTIONS.map((opt) => (
+                      <Choice
+                        key={opt}
+                        label={opt}
+                        selected={status === opt}
+                        onPress={() => handleStatusSelect(opt)}
+                      />
+                    ))}
                   </View>
                 </View>
 
                 {status === 'Em uso' && (
-                  <>
-                    <View style={styles.inputGroup}>
-                      <Text style={styles.label}>Data de retirada</Text>
-                      <TextInput
-                        style={[
-                          styles.input,
-                          errors.dataEmprestimo && styles.inputError,
-                        ]}
+                  <View style={[styles.dateRow, isNarrow && { flexDirection: 'column', gap: 0 }]}>
+                    <View style={[styles.inputGroup, styles.dateCol]}>
+                      <FieldLabel>Data de retirada</FieldLabel>
+                      <GlassInput
+                        hasError={Boolean(errors.dataEmprestimo)}
+                        numeric
                         placeholder="DD/MM/AAAA"
-                        placeholderTextColor={COLORS.textMuted}
                         value={dataEmprestimo}
                         onChangeText={(text) => {
                           setDataEmprestimo(formatDateInput(text));
@@ -433,15 +406,12 @@ export default function EquipmentFormScreen({ route, navigation }) {
                       ) : null}
                     </View>
 
-                    <View style={styles.inputGroup}>
-                      <Text style={styles.label}>Data de devolução prevista</Text>
-                      <TextInput
-                        style={[
-                          styles.input,
-                          errors.dataDevolucao && styles.inputError,
-                        ]}
+                    <View style={[styles.inputGroup, styles.dateCol]}>
+                      <FieldLabel>Data de devolução prevista</FieldLabel>
+                      <GlassInput
+                        hasError={Boolean(errors.dataDevolucao)}
+                        numeric
                         placeholder="DD/MM/AAAA"
-                        placeholderTextColor={COLORS.textMuted}
                         value={dataDevolucao}
                         onChangeText={(text) => {
                           setDataDevolucao(formatDateInput(text));
@@ -456,129 +426,158 @@ export default function EquipmentFormScreen({ route, navigation }) {
                         </Text>
                       ) : null}
                     </View>
-                  </>
+                  </View>
                 )}
               </>
             )}
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Foto do Equipamento (Recurso Nativo)</Text>
-              <TouchableOpacity
-                style={styles.imagePickerButton}
+              <FieldLabel>Foto do Equipamento (Recurso Nativo)</FieldLabel>
+              <Pressable
                 onPress={handlePickImage}
-                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel={fotoUri ? 'Alterar foto' : 'Tirar ou escolher foto da galeria'}
               >
-                {fotoUri ? (
-                  <View style={styles.imagePreviewContainer}>
-                    <Image source={{ uri: fotoUri }} style={styles.imagePreview} />
-                    <View style={styles.changeImageBadge}>
-                      <Ionicons name="camera" size={14} color={COLORS.textWhite} />
-                      <Text style={styles.changeImageText}>Alterar foto</Text>
+                {({ hovered }) =>
+                  fotoUri ? (
+                    <View style={styles.imagePreviewContainer}>
+                      <Image source={{ uri: fotoUri }} style={styles.imagePreview} />
+                      <View style={styles.changeImageBadge}>
+                        <Ionicons name="camera" size={14} color={COLORS.ink} />
+                        <Text style={styles.changeImageText}>Alterar foto</Text>
+                      </View>
                     </View>
-                  </View>
-                ) : (
-                  <View style={styles.pickImagePlaceholder}>
-                    <Ionicons name="camera-outline" size={32} color={COLORS.primary} />
-                    <Text style={styles.pickImageText}>Tirar ou escolher foto da galeria</Text>
-                    <Text style={styles.pickImageSubtext}>(Recurso nativo expo-image-picker)</Text>
-                  </View>
-                )}
-              </TouchableOpacity>
+                  ) : (
+                    <View style={[styles.pickImagePlaceholder, hovered && styles.pickImageHover]}>
+                      <View style={styles.pickIcon}>
+                        <Ionicons name="camera-outline" size={22} color={COLORS.white} />
+                      </View>
+                      <Text style={styles.pickImageText}>Tirar ou escolher foto da galeria</Text>
+                      <Text style={styles.pickImageSubtext}>(Recurso nativo expo-image-picker)</Text>
+                    </View>
+                  )
+                }
+              </Pressable>
               {fotoUri ? (
-                <TouchableOpacity
-                  style={styles.removeImageButton}
+                <GlassButton
+                  label="Remover foto"
+                  icon="trash-outline"
+                  tone="danger"
                   onPress={() => setFotoUri(null)}
-                >
-                  <Ionicons name="trash-outline" size={16} color={COLORS.error} />
-                  <Text style={styles.removeImageText}>Remover foto</Text>
-                </TouchableOpacity>
+                  style={{ alignSelf: 'flex-start' }}
+                />
               ) : null}
             </View>
 
-            <TouchableOpacity
-              style={[styles.saveButton, isSaving && styles.buttonDisabled]}
-              onPress={handleSaveEquipment}
-              disabled={isSaving}
-            >
-              <Text style={styles.saveButtonText}>
-                {isSaving
+            <PrimaryButton
+              label={
+                isSaving
                   ? 'Salvando...'
                   : isEditing
                   ? 'Salvar alterações'
-                  : 'Cadastrar'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+                  : 'Cadastrar'
+              }
+              onPress={handleSaveEquipment}
+              disabled={isSaving}
+              style={{ marginTop: 4 }}
+            />
+          </FadeUp>
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
+    </Backdrop>
+  );
+}
+
+// Campo de texto em vidro; a borda acende no foco
+function GlassInput({ hasError, numeric, style, ...props }) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <TextInput
+      {...props}
+      placeholderTextColor={COLORS.text30}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      style={[
+        styles.input,
+        numeric && TABULAR,
+        focused && styles.inputFocused,
+        hasError && styles.inputError,
+        style,
+      ]}
+    />
+  );
+}
+
+// Opção selecionável (categoria/status): a selecionada fica branca
+function Choice({ label, selected, onPress }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+    >
+      {({ hovered }) => (
+        <View
+          style={[
+            styles.chip,
+            hovered && !selected && styles.chipHover,
+            selected && styles.chipSelected,
+          ]}
+        >
+          <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
+            {label}
+          </Text>
+        </View>
+      )}
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.headerBg,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: COLORS.headerBg,
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: COLORS.textWhite,
-  },
-  body: {
-    flex: 1,
-    backgroundColor: COLORS.bodyBg,
-  },
   scrollContent: {
-    padding: 16,
+    width: '100%',
+    maxWidth: 760,
+    alignSelf: 'center',
+    paddingBottom: 48,
+  },
+  hero: {
+    paddingTop: 8,
+    paddingBottom: 28,
   },
   card: {
-    backgroundColor: COLORS.cardBg,
-    borderRadius: 10,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
-    marginBottom: 6,
-  },
-  input: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: COLORS.panel,
+    borderRadius: RADIUS.panel,
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    padding: 22,
+  },
+  inputGroup: {
+    marginBottom: 22,
+    gap: 10,
+  },
+  input: {
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: RADIUS.control,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontFamily: FONTS.body400,
     fontSize: 15,
-    color: COLORS.textPrimary,
+    color: COLORS.white,
+    outlineStyle: 'none',
+  },
+  inputFocused: {
+    borderColor: 'rgba(255,255,255,0.45)',
+    backgroundColor: 'rgba(255,255,255,0.06)',
   },
   inputError: {
-    borderColor: COLORS.error,
+    borderColor: COLORS.danger,
   },
   errorText: {
-    marginTop: 4,
-    fontSize: 12,
-    color: COLORS.error,
+    fontFamily: FONTS.body500,
+    color: COLORS.danger,
+    fontSize: 13,
   },
   chipsContainer: {
     flexDirection: 'row',
@@ -586,71 +585,78 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   chip: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: RADIUS.pill,
     borderWidth: 1,
     borderColor: COLORS.border,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+  },
+  chipHover: {
+    borderColor: COLORS.borderStrong,
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   chipSelected: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.white,
   },
   chipText: {
+    fontFamily: FONTS.display700,
     fontSize: 13,
-    color: COLORS.textSecondary,
-    fontWeight: '500',
+    color: COLORS.text70,
   },
   chipTextSelected: {
-    color: COLORS.textWhite,
-    fontWeight: '600',
+    color: COLORS.ink,
   },
-  saveButton: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 8,
+  dateRow: {
+    flexDirection: 'row',
+    gap: 14,
   },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  saveButtonText: {
-    color: COLORS.textWhite,
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-  imagePickerButton: {
-    borderWidth: 1.5,
-    borderColor: '#CBD5E1',
-    borderStyle: 'dashed',
-    borderRadius: 8,
-    overflow: 'hidden',
-    backgroundColor: '#F8FAFC',
-    minHeight: 120,
-    justifyContent: 'center',
-    alignItems: 'center',
+  dateCol: {
+    flex: 1,
   },
   pickImagePlaceholder: {
     alignItems: 'center',
-    padding: 16,
+    justifyContent: 'center',
+    paddingVertical: 28,
+    paddingHorizontal: 16,
+    borderRadius: RADIUS.panel,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: 'rgba(255,255,255,0.18)',
+    backgroundColor: 'rgba(255,255,255,0.025)',
+  },
+  pickImageHover: {
+    borderColor: 'rgba(255,255,255,0.35)',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  pickIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    marginBottom: 12,
   },
   pickImageText: {
+    fontFamily: FONTS.display700,
     fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.primary,
-    marginTop: 6,
+    color: COLORS.white,
+    textAlign: 'center',
   },
   pickImageSubtext: {
+    fontFamily: FONTS.body400,
     fontSize: 12,
-    color: COLORS.textSecondary,
-    marginTop: 2,
+    color: COLORS.text50,
+    marginTop: 4,
+    textAlign: 'center',
   },
   imagePreviewContainer: {
     width: '100%',
-    height: 180,
-    position: 'relative',
+    height: 200,
+    borderRadius: RADIUS.panel,
+    overflow: 'hidden',
   },
   imagePreview: {
     width: '100%',
@@ -659,31 +665,19 @@ const styles = StyleSheet.create({
   },
   changeImageBadge: {
     position: 'absolute',
-    bottom: 8,
-    right: 8,
-    backgroundColor: 'rgba(30, 41, 59, 0.85)',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 16,
-    gap: 4,
-  },
-  changeImageText: {
-    color: COLORS.textWhite,
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  removeImageButton: {
+    bottom: 12,
+    right: 12,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginTop: 8,
-    alignSelf: 'flex-start',
+    backgroundColor: COLORS.white,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
   },
-  removeImageText: {
-    fontSize: 13,
-    color: COLORS.error,
-    fontWeight: '500',
+  changeImageText: {
+    fontFamily: FONTS.display700,
+    fontSize: 12,
+    color: COLORS.ink,
   },
 });

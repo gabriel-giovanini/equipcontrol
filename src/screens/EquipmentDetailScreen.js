@@ -4,13 +4,12 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   Platform,
   Alert,
   Image,
+  useWindowDimensions,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import {
@@ -18,27 +17,17 @@ import {
   updateEquipmentStatus,
   deleteEquipment,
 } from '../database/database';
+import { COLORS, FONTS, RADIUS, TABULAR, WIDE_BREAKPOINT, getPalette } from '../theme/theme';
+import Backdrop, { Grain, RadialFill } from '../ui/Backdrop';
+import { TopBar } from '../ui/Shell';
+import { FieldLabel, Heading, Kicker } from '../ui/Typography';
+import { GlassButton, PrimaryButton } from '../ui/Buttons';
+import FloatingIllustration, { useTilt } from '../ui/Illustration';
+import StatusDot from '../ui/StatusDot';
+import { FadeUp } from '../ui/motion';
 
 // Consulta SQL direta para detalhe (SELECT ... WHERE id = ?)
 const SQL_DETAIL_QUERY = 'SELECT * FROM equipments WHERE id = ?';
-
-const COLORS = {
-  headerBg: '#1E293B',
-  bodyBg: '#F1F5F9',
-  cardBg: '#FFFFFF',
-  primary: '#4F46E5',
-  primaryBg: '#EEF2FF',
-  success: '#16A34A',
-  successBg: '#DCFCE7',
-  warning: '#D97706',
-  warningBg: '#FEF3C7',
-  error: '#DC2626',
-  errorBg: '#FEE2E2',
-  textWhite: '#FFFFFF',
-  textPrimary: '#1E293B',
-  textSecondary: '#64748B',
-  border: '#E2E8F0',
-};
 
 function getTodayFormatted() {
   const today = new Date();
@@ -63,9 +52,11 @@ function showMessage(title, message, onConfirm) {
 
 export default function EquipmentDetailScreen({ route, navigation }) {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   const { equipment: initialEquipment } = route.params;
   const [equipment, setEquipment] = useState(initialEquipment);
   const [isUpdating, setIsUpdating] = useState(false);
+  const tilt = useTilt(8);
 
   useFocusEffect(
     useCallback(() => {
@@ -172,281 +163,190 @@ export default function EquipmentDetailScreen({ route, navigation }) {
     );
   };
 
+  const isWide = width >= WIDE_BREAKPOINT;
+  const isNarrow = width < 520;
+  const palette = getPalette(equipment.categoria);
+
+  const infoRows = [
+    { label: 'Categoria', value: equipment.categoria || 'Geral' },
+    { label: 'Responsável', value: equipment.responsavel || 'Não atribuído' },
+    { label: 'Data de cadastro', value: equipment.dataCadastro || '-', numeric: true },
+    { label: 'Data de retirada', value: equipment.dataEmprestimo || '-', numeric: true },
+    { label: 'Data de devolução', value: equipment.dataDevolucao || '-', numeric: true },
+  ];
+
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <Backdrop glowColor={palette.accent} style={{ paddingTop: insets.top }}>
       <StatusBar style="light" />
 
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={22} color={COLORS.textWhite} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Detalhes do Equipamento</Text>
-        <View style={{ width: 36 }} />
-      </View>
+      <TopBar
+        title="Detalhes do Equipamento"
+        subtitle={equipment.categoria || 'Geral'}
+        onBack={() => navigation.goBack()}
+      />
 
       <ScrollView
-        style={styles.body}
-        contentContainerStyle={styles.scrollContent}
+        style={{ flex: 1 }}
+        contentContainerStyle={[styles.scrollContent, { paddingHorizontal: isNarrow ? 16 : 24 }]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.card}>
-          {equipment.foto ? (
-            <View style={styles.imageCardContainer}>
-              <Image source={{ uri: equipment.foto }} style={styles.equipmentImage} />
-            </View>
-          ) : null}
+        <FadeUp index={0} style={styles.hero}>
+          <Kicker>Ficha do equipamento</Kicker>
+          <Heading
+            line1={equipment.nome}
+            line2={equipment.categoria || 'Geral'}
+            scale={0.82}
+            style={{ marginTop: 14 }}
+          />
+          <StatusDot status={equipment.status} style={{ marginTop: 16 }} />
+        </FadeUp>
 
-          <View style={styles.cardTop}>
-            <Text style={styles.equipmentName}>{equipment.nome}</Text>
+        <View style={[styles.columns, isWide && styles.columnsWide]}>
+          <FadeUp index={1} style={isWide ? { flex: 1.1 } : null}>
             <View
               style={[
-                styles.statusBadge,
-                {
-                  backgroundColor: isAvailable
-                    ? COLORS.successBg
-                    : COLORS.warningBg,
-                },
+                styles.visual,
+                equipment.foto ? { height: isNarrow ? 260 : 340 } : { minHeight: 340 },
               ]}
+              {...tilt.handlers}
             >
-              <Text
-                style={[
-                  styles.statusText,
-                  { color: isAvailable ? COLORS.success : COLORS.warning },
-                ]}
-              >
-                {equipment.status}
-              </Text>
+              {equipment.foto ? (
+                <>
+                  <Image
+                    source={{ uri: equipment.foto }}
+                    style={styles.equipmentImage}
+                    resizeMode="cover"
+                  />
+                  <Grain opacity={0.06} />
+                </>
+              ) : (
+                <>
+                  <RadialFill c1={palette.c1} c2={palette.c2} c3={palette.c3} />
+                  <Grain opacity={0.08} />
+                  <FloatingIllustration
+                    categoria={equipment.categoria}
+                    size={isNarrow ? 180 : 230}
+                    tiltTransform={tilt.transform}
+                  />
+                </>
+              )}
             </View>
-          </View>
+          </FadeUp>
 
-          <View style={styles.divider} />
+          <View style={[styles.side, isWide && { flex: 1 }]}>
+            <FadeUp index={2} style={styles.card}>
+              {infoRows.map((row, i) => (
+                <View
+                  key={row.label}
+                  style={[styles.infoRow, i === infoRows.length - 1 && { borderBottomWidth: 0 }]}
+                >
+                  <FieldLabel>{row.label}</FieldLabel>
+                  <Text
+                    style={[styles.infoValue, row.numeric && TABULAR]}
+                    numberOfLines={2}
+                  >
+                    {row.value}
+                  </Text>
+                </View>
+              ))}
+            </FadeUp>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Categoria</Text>
-            <Text style={styles.infoValue}>{equipment.categoria || 'Geral'}</Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Responsável</Text>
-            <Text style={styles.infoValue}>
-              {equipment.responsavel || 'Não atribuído'}
-            </Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Data de cadastro</Text>
-            <Text style={styles.infoValue}>{equipment.dataCadastro || '-'}</Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Data de retirada</Text>
-            <Text style={styles.infoValue}>{equipment.dataEmprestimo || '-'}</Text>
-          </View>
-
-          <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
-            <Text style={styles.infoLabel}>Data de devolução</Text>
-            <Text style={styles.infoValue}>{equipment.dataDevolucao || '-'}</Text>
-          </View>
-        </View>
-
-        <View style={styles.actionsContainer}>
-          <TouchableOpacity
-            style={[
-              styles.statusButton,
-              { backgroundColor: isAvailable ? COLORS.warning : COLORS.success },
-              isUpdating && styles.disabledButton,
-            ]}
-            onPress={handleToggleStatus}
-            disabled={isUpdating}
-          >
-            <Ionicons
-              name={isAvailable ? 'swap-horizontal-outline' : 'checkmark-circle-outline'}
-              size={20}
-              color={COLORS.textWhite}
-            />
-            <Text style={styles.statusButtonText}>
-              {isAvailable ? 'Marcar como Em uso' : 'Registrar devolução'}
-            </Text>
-          </TouchableOpacity>
-
-          <View style={styles.rowButtons}>
-            <TouchableOpacity
-              style={[styles.editButton, isUpdating && styles.disabledButton]}
-              onPress={handleEditEquipment}
-              disabled={isUpdating}
-            >
-              <Ionicons name="create-outline" size={18} color={COLORS.primary} />
-              <Text style={styles.editButtonText}>Editar</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.deleteButton, isUpdating && styles.disabledButton]}
-              onPress={handleDeleteEquipment}
-              disabled={isUpdating}
-            >
-              <Ionicons name="trash-outline" size={18} color={COLORS.error} />
-              <Text style={styles.deleteButtonText}>Excluir</Text>
-            </TouchableOpacity>
+            <FadeUp index={3} style={styles.actionsContainer}>
+              <PrimaryButton
+                label={isAvailable ? 'Marcar como Em uso' : 'Registrar devolução'}
+                onPress={handleToggleStatus}
+                disabled={isUpdating}
+              />
+              <View style={styles.rowButtons}>
+                <GlassButton
+                  label="Editar"
+                  icon="create-outline"
+                  onPress={handleEditEquipment}
+                  disabled={isUpdating}
+                  style={{ flex: 1 }}
+                />
+                <GlassButton
+                  label="Excluir"
+                  icon="trash-outline"
+                  tone="danger"
+                  onPress={handleDeleteEquipment}
+                  disabled={isUpdating}
+                  style={{ flex: 1 }}
+                />
+              </View>
+            </FadeUp>
           </View>
         </View>
       </ScrollView>
-    </View>
+    </Backdrop>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.headerBg,
+  scrollContent: {
+    width: '100%',
+    maxWidth: 1180,
+    alignSelf: 'center',
+    paddingBottom: 48,
   },
-  header: {
+  hero: {
+    paddingTop: 8,
+    paddingBottom: 28,
+  },
+  columns: {
+    gap: 14,
+  },
+  columnsWide: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: COLORS.headerBg,
+    alignItems: 'flex-start',
   },
-  backButton: {
-    width: 36,
-    height: 36,
+  visual: {
+    width: '100%',
+    borderRadius: RADIUS.panel,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#1c1917',
   },
-  headerTitle: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: COLORS.textWhite,
+  equipmentImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
   },
-  body: {
-    flex: 1,
-    backgroundColor: COLORS.bodyBg,
-  },
-  scrollContent: {
-    padding: 16,
+  side: {
+    gap: 14,
   },
   card: {
-    backgroundColor: COLORS.cardBg,
-    borderRadius: 10,
-    padding: 16,
+    backgroundColor: COLORS.panel,
+    borderRadius: RADIUS.panel,
     borderWidth: 1,
     borderColor: COLORS.border,
-    marginBottom: 16,
-  },
-  cardTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-    gap: 10,
-  },
-  equipmentName: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.textPrimary,
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 6,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: COLORS.border,
-    marginBottom: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 6,
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 12,
+    alignItems: 'center',
+    gap: 16,
+    paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  infoLabel: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-  },
   infoValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.textPrimary,
+    flexShrink: 1,
+    textAlign: 'right',
+    fontFamily: FONTS.body500,
+    fontSize: 15,
+    color: COLORS.white,
   },
   actionsContainer: {
     gap: 10,
   },
-  statusButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 14,
-    borderRadius: 8,
-    gap: 8,
-  },
-  statusButtonText: {
-    color: COLORS.textWhite,
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
   rowButtons: {
     flexDirection: 'row',
     gap: 10,
-  },
-  editButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: COLORS.cardBg,
-    borderWidth: 1,
-    borderColor: COLORS.primary,
-    gap: 6,
-  },
-  editButtonText: {
-    color: COLORS.primary,
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  deleteButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: COLORS.cardBg,
-    borderWidth: 1,
-    borderColor: COLORS.error,
-    gap: 6,
-  },
-  deleteButtonText: {
-    color: COLORS.error,
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  disabledButton: {
-    opacity: 0.6,
-  },
-  imageCardContainer: {
-    width: '100%',
-    height: 180,
-    borderRadius: 8,
-    overflow: 'hidden',
-    marginBottom: 14,
-    backgroundColor: '#F8FAFC',
-  },
-  equipmentImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
   },
 });
